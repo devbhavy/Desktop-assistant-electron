@@ -23,6 +23,29 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   // ...
 })
 
-contextBridge.exposeInMainWorld("electronAPI",{
-  readClipboard : ()=>ipcRenderer.invoke("read-clipboard-text")
-})
+contextBridge.exposeInMainWorld("electronAPI", {
+  readClipboard: () =>
+    ipcRenderer.invoke("read-clipboard-text"),
+
+  onTypingChange: (
+    callback: (isTyping: boolean) => void
+  ) => {
+    const startedListener = () => callback(true);
+    const stoppedListener = () => callback(false);
+
+    ipcRenderer.on("typing-started", startedListener);
+    ipcRenderer.on("typing-stopped", stoppedListener);
+
+    return () => {
+      ipcRenderer.removeListener(
+        "typing-started",
+        startedListener
+      );
+
+      ipcRenderer.removeListener(
+        "typing-stopped",
+        stoppedListener
+      );
+    };
+  },
+});

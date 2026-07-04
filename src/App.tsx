@@ -5,7 +5,8 @@ import { useEffect, useState } from "react"
 function App(){
 
   const [data,setData] = useState("");
-  const [userTyping,setUserTyping] = useState(false);
+
+  const [isTyping,setIsTyping] = useState(false)
   
 
   useEffect(()=>{
@@ -16,6 +17,16 @@ function App(){
     })()
     
   },[])
+
+  useEffect(() => {
+    const cleanup =
+      window.electronAPI.onTypingChange((typing) => {
+        setIsTyping(typing);
+      });
+
+    return cleanup;
+  }, []);
+
 
   async function handleClick(){
     const response = await window.electronAPI.readClipboard();
@@ -28,10 +39,9 @@ function App(){
     <div style={{backgroundColor : "white", display : "flex", flexDirection : "column", alignItems : "center"}}>
       <button onClick={handleClick}>Update text</button>
       <div>Text : {data}</div>
-      <button onClick={()=>setUserTyping((prev)=>!prev)}>check</button>
       {
-        userTyping?<div>
-          user is typing....1
+        isTyping?<div>
+          user is typing....!
         </div>:
         null
       }

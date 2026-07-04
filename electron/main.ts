@@ -2,6 +2,7 @@ import { app, BrowserWindow, clipboard, ipcMain } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import {uIOhook} from 'uiohook-napi'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -76,4 +77,29 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(()=>{
+  createWindow();
+
+
+  let isTyping = false;
+  let typingTimeout : NodeJS.Timeout;
+
+  uIOhook.on("keydown",()=>{
+    if(!isTyping){
+      isTyping=true
+      console.log("typing started");
+
+      win?.webContents.send("typing-started")
+    }
+    clearTimeout(typingTimeout!)
+    typingTimeout = setTimeout(() => {
+      isTyping = false
+      console.log("user stopped typing")
+      win?.webContents.send("typing-stopped")
+    }, 1000);
+    
+    
+  })
+  uIOhook.start()
+
+})
