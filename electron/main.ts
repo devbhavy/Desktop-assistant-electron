@@ -37,7 +37,7 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     transparent : true,
     frame : false,
-    //alwaysOnTop : true,
+    // alwaysOnTop : true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
 
