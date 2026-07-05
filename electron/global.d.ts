@@ -1,11 +1,11 @@
 export {};
-
+type currentState = "idle"|"typing"
 declare global {
   interface Window {
     electronAPI: {
       readClipboard: () => string;
       onTypingChange: (
-        callback: (isTyping: boolean) => void
+        callback: (isTyping:currentState ) => void
       ) => () => void; 
     };
 

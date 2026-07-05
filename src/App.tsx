@@ -39,10 +39,7 @@ function CatSprite({
 function App(){
 
   const [data,setData] = useState("");
-
-  const [currentState,setCurrentState] = useState<currentState>("idle")
-
-  const [isTyping,setIsTyping] = useState(false)
+  const [currentState,setCurrentState] = useState<currentState>("idle");
   
 
   const timeout = useRef<any>();
@@ -67,7 +64,7 @@ function App(){
   useEffect(() => {
     const cleanup =
       window.electronAPI.onTypingChange((typing) => {
-        setIsTyping(typing);
+        setCurrentState(typing)
       });
 
     return cleanup;
@@ -86,7 +83,7 @@ function App(){
       <button onClick={handleClick}>Update text</button>
       <div>Text : {data}</div>
       {
-        isTyping?<div>
+        currentState=="typing"?<div>
           user is typing....!
         </div>:
         null

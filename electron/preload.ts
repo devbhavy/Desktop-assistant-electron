@@ -23,15 +23,16 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   // ...
 })
 
+type currentState = "idle"|"typing"
 contextBridge.exposeInMainWorld("electronAPI", {
   readClipboard: () =>
     ipcRenderer.invoke("read-clipboard-text"),
 
   onTypingChange: (
-    callback: (isTyping: boolean) => void
+    callback: (isTyping: currentState) => void
   ) => {
-    const startedListener = () => callback(true);
-    const stoppedListener = () => callback(false);
+    const startedListener = () => callback("typing");
+    const stoppedListener = () => callback("idle");
 
     ipcRenderer.on("typing-started", startedListener);
     ipcRenderer.on("typing-stopped", stoppedListener);
