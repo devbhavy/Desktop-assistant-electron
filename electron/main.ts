@@ -37,13 +37,14 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     transparent : true,
     frame : false,
+    //alwaysOnTop : true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
 
     },
   })
 
-  
+
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
