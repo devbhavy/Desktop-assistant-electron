@@ -52,6 +52,10 @@ function App(){
     return cleanup;
   }, []);
 
+  useEffect(()=>{
+    console.log(currentState)
+  },[currentState])
+
 
   async function handleClick(){
     const response = await window.electronAPI.readClipboard();
@@ -82,7 +86,7 @@ function App(){
         ) : currentState === "typing" ? (
           <Typing />
         ) : currentState === "hover" ? (
-          <CatSprite row={43} col={1} />
+          <Hover/>
         ) : (
           <CatSprite row={65} col={2} />
         )}

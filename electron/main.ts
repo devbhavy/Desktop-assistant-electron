@@ -32,50 +32,8 @@ ipcMain.handle('read-clipboard-text', () => {
   return clipboard.readText()
 })
 
-// function lockWindowSize(targetWindow: BrowserWindow) {
-//   const [width, height] = targetWindow.getSize();
-//   targetWindow.setResizable(false);
-//   targetWindow.setMinimumSize(width, height);
-//   targetWindow.setMaximumSize(width, height);
-// }
 
 
-
-
-// ipcMain.on("lock-window-size", (event) => {
-//   const targetWindow = BrowserWindow.fromWebContents(event.sender);
-//   if (targetWindow) lockWindowSize(targetWindow);
-// });
-
-ipcMain.handle("get-window-position", (event) => {
-  const targetWindow =
-    BrowserWindow.fromWebContents(event.sender);
-
-  if (!targetWindow) {
-    return [0, 0];
-  }
-
-  return targetWindow.getPosition();
-});
-
-ipcMain.on(
-  "set-window-position",
-  (
-    event,
-    x: number,
-    y: number
-  ) => {
-    const targetWindow =
-      BrowserWindow.fromWebContents(event.sender);
-
-    if (!targetWindow) return;
-
-    targetWindow.setPosition(
-      Math.round(x),
-      Math.round(y)
-    );
-  }
-);
 let dragTimer: NodeJS.Timeout | null = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
@@ -125,7 +83,7 @@ ipcMain.on("stop-drag", () => {
   }
 });
 function createWindow() {
-  let win: BrowserWindow | null
+  // let win: BrowserWindow | null
 
   
   win = new BrowserWindow({
