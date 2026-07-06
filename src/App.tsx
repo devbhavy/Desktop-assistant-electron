@@ -65,7 +65,7 @@ function App(){
 
 
   return(
-    <div className="bg-white flex flex-col items-center justify-center">
+    <div className=" flex flex-col items-center justify-center">
       <button onClick={handleClick}>Update text</button>
       <div>Text : {data}</div>
       <div>currentState : {currentState}</div>
@@ -77,7 +77,7 @@ function App(){
       }
       <button onClick={doSomething}>mimick action</button>
       <div
-        className="relative h-[192px] w-[192px] bg-red-600"
+        className="relative h-[192px] w-[192px]"
         > 
 
         <div className="pointer-events-none">
@@ -100,7 +100,7 @@ function App(){
             w-[105px]
             h-[120px]
             [-webkit-app-region:no-drag]
-            bg-blue-400/45
+            
           "
           onPointerEnter={() => {
             if (dragRef.current.isDragging) return;
