@@ -22,6 +22,9 @@ declare global {
       ) => () => void;
       startDrag: () => void;
       stopDrag: () => void;
+      onCatMenuClosed: (
+        callback: () => void
+      ) => () => void;
     };
   }
 }

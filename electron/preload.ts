@@ -60,4 +60,21 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showCatMenu: () => {
     ipcRenderer.send("show-cat-menu");
   },
+  onCatMenuClosed: (
+    callback: () => void
+  ) => {
+    const listener = () => callback();
+  
+    ipcRenderer.on(
+      "cat-menu-closed",
+      listener
+    );
+  
+    return () => {
+      ipcRenderer.removeListener(
+        "cat-menu-closed",
+        listener
+      );
+    };
+  },
 });

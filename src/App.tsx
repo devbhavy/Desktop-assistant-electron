@@ -19,11 +19,23 @@ function App(){
   const [currentState,setCurrentState] = useState<currentState>("idle");
 
   
-
-  // const timeout = useRef<any>();
+  useEffect(() => {
+    const cleanup =
+      window.electronAPI.onCatMenuClosed(() => {
+        setCurrentState((prev) => {
+          if (prev === "typing") return "typing";
+          return "idle";
+        });
+      });
+  
+    return cleanup;
+  }, []);
   const dragRef = useRef({
     isDragging: false,
   });
+  
+  
+  // const timeout = useRef<any>();
   
   // function doSomething(){
   //   clearTimeout(timeout.current)
