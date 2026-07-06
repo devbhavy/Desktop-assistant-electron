@@ -22,6 +22,7 @@ export function CatSprite({
             imageRendering: "pixelated",
             transform: `scale(${scale})`,
             transformOrigin: "top left",
+            objectFit : "fill"
           }}
         />
       </div>

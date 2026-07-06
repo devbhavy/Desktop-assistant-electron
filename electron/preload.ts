@@ -49,4 +49,21 @@ contextBridge.exposeInMainWorld("electronAPI", {
       );
     };
   },
+  // lockWindowSize: () => {
+  //   ipcRenderer.send("lock-window-size");
+  // },
+  getWindowPosition: (): Promise<[number, number]> => {
+    return ipcRenderer.invoke("get-window-position");
+  },
+  
+  setWindowPosition: (x: number, y: number) => {
+    ipcRenderer.send("set-window-position", x, y);
+  },
+  startDrag: () => {
+    ipcRenderer.send("start-drag");
+  },
+  
+  stopDrag: () => {
+    ipcRenderer.send("stop-drag");
+  },
 });

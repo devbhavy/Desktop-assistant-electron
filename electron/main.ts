@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, ipcMain } from 'electron'
+import { app, BrowserWindow, clipboard, ipcMain,screen } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -32,21 +32,122 @@ ipcMain.handle('read-clipboard-text', () => {
   return clipboard.readText()
 })
 
+// function lockWindowSize(targetWindow: BrowserWindow) {
+//   const [width, height] = targetWindow.getSize();
+//   targetWindow.setResizable(false);
+//   targetWindow.setMinimumSize(width, height);
+//   targetWindow.setMaximumSize(width, height);
+// }
+
+
+
+
+// ipcMain.on("lock-window-size", (event) => {
+//   const targetWindow = BrowserWindow.fromWebContents(event.sender);
+//   if (targetWindow) lockWindowSize(targetWindow);
+// });
+
+ipcMain.handle("get-window-position", (event) => {
+  const targetWindow =
+    BrowserWindow.fromWebContents(event.sender);
+
+  if (!targetWindow) {
+    return [0, 0];
+  }
+
+  return targetWindow.getPosition();
+});
+
+ipcMain.on(
+  "set-window-position",
+  (
+    event,
+    x: number,
+    y: number
+  ) => {
+    const targetWindow =
+      BrowserWindow.fromWebContents(event.sender);
+
+    if (!targetWindow) return;
+
+    targetWindow.setPosition(
+      Math.round(x),
+      Math.round(y)
+    );
+  }
+);
+let dragTimer: NodeJS.Timeout | null = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+let fixedWidth = 0;
+let fixedHeight = 0;
+
+
+ipcMain.on("start-drag", (event) => {
+  const targetWindow =
+    BrowserWindow.fromWebContents(event.sender);
+
+  if (!targetWindow) return;
+
+  const cursor = screen.getCursorScreenPoint();
+  const bounds = targetWindow.getBounds();
+
+  dragOffsetX = cursor.x - bounds.x;
+  dragOffsetY = cursor.y - bounds.y;
+
+  fixedWidth = bounds.width;
+  fixedHeight = bounds.height;
+
+  if (dragTimer) {
+    clearInterval(dragTimer);
+  }
+
+  dragTimer = setInterval(() => {
+    if (targetWindow.isDestroyed()) return;
+
+    const currentCursor =
+      screen.getCursorScreenPoint();
+
+    targetWindow.setBounds({
+      x: currentCursor.x - dragOffsetX,
+      y: currentCursor.y - dragOffsetY,
+      width: fixedWidth,
+      height: fixedHeight,
+    });
+  }, 16);
+});
+
+ipcMain.on("stop-drag", () => {
+  if (dragTimer) {
+    clearInterval(dragTimer);
+    dragTimer = null;
+  }
+});
 function createWindow() {
+  let win: BrowserWindow | null
+
+  
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
-    transparent : true,
-    frame : false,
-    // alwaysOnTop : true,
+    width: 800,
+    height: 600,
+  
+    icon: path.join(
+      process.env.VITE_PUBLIC,
+      "electron-vite.svg"
+    ),
+  
+    transparent: true,
+    frame: false,
+    resizable: false,
+  
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
-
+      preload: path.join(__dirname, "preload.mjs"),
     },
-  })
+  });
 
 
 
-  // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
@@ -85,6 +186,7 @@ app.whenReady().then(()=>{
   let isTyping = false;
   let typingTimeout : NodeJS.Timeout;
 
+
   uIOhook.on("keydown",()=>{
     if(!isTyping){
       isTyping=true
@@ -101,6 +203,7 @@ app.whenReady().then(()=>{
     
     
   })
+
   uIOhook.start()
 
 })

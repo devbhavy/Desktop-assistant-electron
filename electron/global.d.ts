@@ -1,13 +1,26 @@
 export {};
-type currentState = "idle"|"typing"
+
+type currentState = "idle" | "typing";
+
 declare global {
   interface Window {
     electronAPI: {
-      readClipboard: () => string;
-      onTypingChange: (
-        callback: (isTyping:currentState ) => void
-      ) => () => void; 
-    };
+      readClipboard: () => Promise<string>;
 
+      lockWindowSize: () => void;
+
+      getWindowPosition: () => Promise<[number, number]>;
+
+      setWindowPosition: (
+        x: number,
+        y: number
+      ) => void;
+
+      onTypingChange: (
+        callback: (isTyping: currentState) => void
+      ) => () => void;
+      startDrag: () => void;
+      stopDrag: () => void;
+    };
   }
 }

@@ -1,3 +1,4 @@
+@import "tailwindcss";
 body {
   background: transparent;
   -webkit-app-region: drag;
