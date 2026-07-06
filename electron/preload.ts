@@ -57,4 +57,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   stopDrag: () => {
     ipcRenderer.send("stop-drag");
   },
+  showCatMenu: () => {
+    ipcRenderer.send("show-cat-menu");
+  },
 });

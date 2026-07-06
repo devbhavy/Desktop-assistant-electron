@@ -17,20 +17,22 @@ function App(){
 
   const [data,setData] = useState("");
   const [currentState,setCurrentState] = useState<currentState>("idle");
+
   
 
-  const timeout = useRef<any>();
+  // const timeout = useRef<any>();
   const dragRef = useRef({
     isDragging: false,
   });
-  function doSomething(){
-    clearTimeout(timeout.current)
-    setCurrentState("typing");
+  
+  // function doSomething(){
+  //   clearTimeout(timeout.current)
+  //   setCurrentState("typing");
 
-    timeout.current = setTimeout(()=>{
-      setCurrentState("idle");
-    },2000)
-  }
+  //   timeout.current = setTimeout(()=>{
+  //     setCurrentState("idle");
+  //   },2000)
+  // }
 
   useEffect(()=>{
     (async()=>{
@@ -57,16 +59,16 @@ function App(){
   },[currentState])
 
 
-  async function handleClick(){
-    const response = await window.electronAPI.readClipboard();
-    setData(response);
+  // async function handleClick(){
+  //   const response = await window.electronAPI.readClipboard();
+  //   setData(response);
 
-  }
+  // }
 
 
   return(
-    <div className=" flex flex-col items-center justify-center">
-      <button onClick={handleClick}>Update text</button>
+    <div className="bg-white flex flex-col items-center justify-center">
+      {/* <button onClick={handleClick}>Update text</button>
       <div>Text : {data}</div>
       <div>currentState : {currentState}</div>
       {
@@ -75,12 +77,12 @@ function App(){
         </div>:
         null
       }
-      <button onClick={doSomething}>mimick action</button>
+      <button onClick={doSomething}>mimick action</button> */}
       <div
-        className="relative h-[192px] w-[192px]"
+        className="relative h-[160px] w-[160px] bg-red-300 overflow-hidden"
         > 
 
-        <div className="pointer-events-none">
+        <div className="absolute left-[-16px] top-[-16px] pointer-events-none">
         {currentState === "idle" ? (
           <Idle />
         ) : currentState === "typing" ? (
@@ -95,11 +97,12 @@ function App(){
         <div
           className="
             absolute
-            left-[45px]
-            top-[40px]
+            left-[29px]
+            top-[24px]
             w-[105px]
             h-[120px]
             [-webkit-app-region:no-drag]
+            bg-red-600/15
             
           "
           onPointerEnter={() => {
@@ -115,6 +118,8 @@ function App(){
           }}
           
           onPointerDown={(e) => {
+
+            if (e.button !== 0) return;
             e.currentTarget.setPointerCapture(e.pointerId);
           
             dragRef.current.isDragging = true;
@@ -142,6 +147,12 @@ function App(){
             window.electronAPI.stopDrag();
           
             setCurrentState("idle");
+          }}
+
+          onContextMenu={(e) => {
+            e.preventDefault();
+          
+            window.electronAPI.showCatMenu();
           }}
         />
         

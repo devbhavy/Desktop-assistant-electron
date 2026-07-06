@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, ipcMain,screen } from 'electron'
+import { app, BrowserWindow, clipboard, ipcMain,screen,Menu } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -82,13 +82,64 @@ ipcMain.on("stop-drag", () => {
     dragTimer = null;
   }
 });
+
+
+
+ipcMain.on("show-cat-menu", (event) => {
+  const targetWindow =
+    BrowserWindow.fromWebContents(event.sender);
+
+  if (!targetWindow) return;
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: "Fixed message",
+      click: () => {
+        console.log("Fixed message clicked");
+      },
+    },
+    {
+      label: "Reminders",
+      click: () => {
+        console.log("Reminders clicked");
+      },
+    },
+    {
+      label: "Pomodoro",
+      click: () => {
+        console.log("Pomodoro clicked");
+      },
+    },
+    {
+      label: "Break Stretch",
+      click: () => {
+        console.log("Break Stretch clicked");
+      },
+    },
+
+    {
+      type: "separator",
+    },
+
+    {
+      label: "Settings",
+      click: () => {
+        console.log("Settings clicked");
+      },
+    },
+  ]);
+
+  menu.popup({
+    window: targetWindow,
+  });
+});
 function createWindow() {
   // let win: BrowserWindow | null
 
   
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 160,
+    height: 160,
   
     icon: path.join(
       process.env.VITE_PUBLIC,
@@ -102,7 +153,38 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
+
   });
+
+  startHitboxTracking(win);
+  let hitboxTimer: NodeJS.Timeout | null = null;
+
+  function startHitboxTracking(targetWindow: BrowserWindow) {
+    hitboxTimer = setInterval(() => {
+      if (targetWindow.isDestroyed()) return;
+
+      // While dragging, don't mess with mouse handling
+      if (dragTimer) return;
+
+      const cursor = screen.getCursorScreenPoint();
+      const bounds = targetWindow.getBounds();
+
+      // Cursor position relative to BrowserWindow
+      const localX = cursor.x - bounds.x;
+      const localY = cursor.y - bounds.y;
+
+      const isInsideHitbox =
+        localX >= 29 &&
+        localX <= 29 + 105 &&
+        localY >= 24 &&
+        localY <= 24 + 120;
+
+      targetWindow.setIgnoreMouseEvents(
+        !isInsideHitbox,
+        { forward: true }
+      );
+    }, 16);
+  }
 
 
 

@@ -10,6 +10,7 @@ declare global {
       lockWindowSize: () => void;
 
       getWindowPosition: () => Promise<[number, number]>;
+      showCatMenu: () => void;
 
       setWindowPosition: (
         x: number,
