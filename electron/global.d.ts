@@ -23,7 +23,9 @@ declare global {
       startDrag: () => void;
       stopDrag: () => void;
       onCatMenuClosed: (
-        callback: () => void
+        callback: (
+          state: "hover" | "idle"
+        ) => void
       ) => () => void;
     };
   }

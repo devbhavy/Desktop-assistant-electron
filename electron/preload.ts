@@ -61,9 +61,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("show-cat-menu");
   },
   onCatMenuClosed: (
-    callback: () => void
+    callback: (state: "hover" | "idle") => void
   ) => {
-    const listener = () => callback();
+    const listener = (
+      _event: Electron.IpcRendererEvent,
+      state: "hover" | "idle"
+    ) => {
+      callback(state);
+    };
   
     ipcRenderer.on(
       "cat-menu-closed",

@@ -21,10 +21,13 @@ function App(){
   
   useEffect(() => {
     const cleanup =
-      window.electronAPI.onCatMenuClosed(() => {
+      window.electronAPI.onCatMenuClosed((state) => {
         setCurrentState((prev) => {
-          if (prev === "typing") return "typing";
-          return "idle";
+          if (prev === "typing") {
+            return "typing";
+          }
+  
+          return state;
         });
       });
   

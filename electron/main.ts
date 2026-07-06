@@ -123,8 +123,24 @@ ipcMain.on("show-cat-menu", (event) => {
 
   menu.popup({
     window: targetWindow,
-    callback : ()=>{
-      targetWindow.webContents.send("cat-menu-closed")
+  
+    callback: () => {
+      const cursor = screen.getCursorScreenPoint();
+      const bounds = targetWindow.getBounds();
+  
+      const localX = cursor.x - bounds.x;
+      const localY = cursor.y - bounds.y;
+  
+      const isInsideHitbox =
+        localX >= 29 &&
+        localX <= 29 + 105 &&
+        localY >= 24 &&
+        localY <= 24 + 120;
+  
+      targetWindow.webContents.send(
+        "cat-menu-closed",
+        isInsideHitbox ? "hover" : "idle"
+      );
     },
   });
 });
