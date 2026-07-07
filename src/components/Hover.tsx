@@ -5,7 +5,7 @@ export function Hover(){
 
 
     return(
-        <div className="relative h-[192px] w-[192px]">
+        <div className="relative">
             <div className="absolute top-8 left-8">
             <PixelHeart/>
             </div>  

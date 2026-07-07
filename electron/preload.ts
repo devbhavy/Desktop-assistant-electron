@@ -82,4 +82,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
       );
     };
   },
+
+  setFixedMessage: (message: string) =>
+    ipcRenderer.invoke("set-fixed-message", message),
+
+  getFixedMessage: () =>
+    ipcRenderer.invoke("get-fixed-message"),
 });
+

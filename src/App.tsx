@@ -3,6 +3,7 @@ import { CatSprite } from "./components/CatSprite";
 import { Idle } from "./components/Idle";
 import { Typing } from "./components/Typing";
 import { Hover } from "./components/Hover";
+import { FixedMessage } from "./components/FixedMessage";
 
 export type CatSpriteProps = {
   row : number,
@@ -15,7 +16,7 @@ type currentState = "idle"|"typing"|"hover"|"holding"
 
 function App(){
 
-  const [data,setData] = useState("");
+  // const [data,setData] = useState("");
   const [currentState,setCurrentState] = useState<currentState>("idle");
 
   
@@ -49,14 +50,14 @@ function App(){
   //   },2000)
   // }
 
-  useEffect(()=>{
-    (async()=>{
-      const response = await window.electronAPI.readClipboard();
-      setData(response);
+  // useEffect(()=>{
+  //   (async()=>{
+  //     const response = await window.electronAPI.readClipboard();
+  //     setData(response);
       
-    })()
+  //   })()
     
-  },[])
+  // },[])
 
   
 
@@ -80,9 +81,19 @@ function App(){
 
   // }
 
+  const isFixedMessageWindow =
+    window.location.hash === "#/fixed-message";
+
+  if (isFixedMessageWindow) {
+    return (
+      <FixedMessage/>
+      
+    );
+  }
+
 
   return(
-    <div className="bg-white flex flex-col items-center justify-center">
+    <div className=" flex flex-col items-center justify-center">
       {/* <button onClick={handleClick}>Update text</button>
       <div>Text : {data}</div>
       <div>currentState : {currentState}</div>
@@ -94,7 +105,7 @@ function App(){
       }
       <button onClick={doSomething}>mimick action</button> */}
       <div
-        className="relative h-[160px] w-[160px] bg-red-300 overflow-hidden"
+        className=" bg-amber-200 relative h-[160px] w-[160px] overflow-hidden"
         > 
 
         <div className="absolute left-[-16px] top-[-16px] pointer-events-none">
@@ -117,7 +128,7 @@ function App(){
             w-[105px]
             h-[120px]
             [-webkit-app-region:no-drag]
-            bg-red-600/15
+           
             
           "
           onPointerEnter={() => {

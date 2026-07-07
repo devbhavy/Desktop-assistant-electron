@@ -27,6 +27,8 @@ declare global {
           state: "hover" | "idle"
         ) => void
       ) => () => void;
+      setFixedMessage: (message: string) => Promise<any>
+      getFixedMessage: () => Promise<any>
     };
   }
 }
