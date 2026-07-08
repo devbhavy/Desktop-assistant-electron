@@ -20,12 +20,19 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 let win: BrowserWindow | null
 let messageWin: BrowserWindow | null = null;
+let reminderWin: BrowserWindow | null = null
 
 const MESSAGE_OFFSET_X = -45;
 const MESSAGE_OFFSET_Y = -100;
 
 const MESSAGE_WIDTH = 350;
 const MESSAGE_HEIGHT = 100;
+
+
+const REMINDER_OFFSET_X = -45;
+const REMINDER_OFFSET_Y = -250;
+const REMINDER_WIDTH = 470;
+const REMINDER_HEIGHT = 230;
 
 
 ipcMain.handle('read-clipboard-text', () => {
@@ -93,6 +100,19 @@ ipcMain.on("start-drag", (event) => {
         height: MESSAGE_HEIGHT,
       });
     }
+
+
+    if (
+      reminderWin &&
+      !reminderWin.isDestroyed()
+    ) {
+      reminderWin.setBounds({
+        x: catX + REMINDER_OFFSET_X,
+        y: catY + REMINDER_OFFSET_Y,
+        width: REMINDER_WIDTH,
+        height: REMINDER_HEIGHT,
+      });
+    }
   }, 16);
 });
 
@@ -149,7 +169,7 @@ ipcMain.on("show-cat-menu", (event) => {
     {
       label: "Reminders",
       click: () => {
-        console.log("Reminders clicked");
+        createReminderWindow()
       },
     },
     {
@@ -356,6 +376,54 @@ function createMessageWindow() {
   });
 }
 
+
+function createReminderWindow() {
+  if(!win){
+    return
+  }
+  if (reminderWin && !reminderWin.isDestroyed()) {
+    reminderWin.focus()
+    return
+  }
+
+
+  const catBounds = win.getBounds();
+    // x: catBounds.x + MESSAGE_OFFSET_X,
+    // y: catBounds.y + MESSAGE_OFFSET_Y,
+
+
+  reminderWin = new BrowserWindow({
+    width: REMINDER_WIDTH,
+    height: REMINDER_HEIGHT,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    x: catBounds.x + REMINDER_OFFSET_X,
+    y: catBounds.y + REMINDER_OFFSET_Y,
+
+
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    reminderWin.loadURL(`${VITE_DEV_SERVER_URL}#/reminder`)
+  } else {
+    reminderWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      { hash: "reminder" }
+    )
+  }
+
+  reminderWin.on("closed", () => {
+    reminderWin = null
+  })
+}
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.

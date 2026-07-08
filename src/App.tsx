@@ -4,6 +4,8 @@ import { Idle } from "./components/Idle";
 import { Typing } from "./components/Typing";
 import { Hover } from "./components/Hover";
 import { FixedMessage } from "./components/FixedMessage";
+import { Reminder } from "./components/Reminder";
+
 
 export type CatSpriteProps = {
   row : number,
@@ -15,7 +17,7 @@ type currentState = "idle"|"typing"|"hover"|"holding"
 
 
 function App(){
-
+  
   // const [data,setData] = useState("");
   const [currentState,setCurrentState] = useState<currentState>("idle");
 
@@ -83,12 +85,22 @@ function App(){
 
   const isFixedMessageWindow =
     window.location.hash === "#/fixed-message";
+  
+  const isReminderWindow =
+    window.location.hash === "#/reminder";
+  
 
   if (isFixedMessageWindow) {
     return (
       <FixedMessage/>
       
     );
+  }
+
+  if(isReminderWindow){
+    return (
+      <Reminder/>
+    )
   }
 
 
