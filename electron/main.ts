@@ -167,6 +167,136 @@ function scheduleOnceReminder(reminder: ReminderData) {
   )
 }
 
+function scheduleDailyReminder(reminder: ReminderData) {
+  const [hours, minutes] = reminder.time
+    .split(":")
+    .map(Number)
+
+  const now = new Date()
+
+  const nextReminder = new Date()
+  nextReminder.setHours(hours, minutes, 0, 0)
+
+  // Today's time already passed → schedule tomorrow
+  if (nextReminder.getTime() <= now.getTime()) {
+    nextReminder.setDate(nextReminder.getDate() + 1)
+  }
+
+  const delay = nextReminder.getTime() - now.getTime()
+
+  const timer = setTimeout(() => {
+    console.log("DAILY REMINDER:", reminder.message)
+
+    showReminderAlert(reminder)
+
+    // Schedule the next occurrence
+    scheduleDailyReminder(reminder)
+  }, delay)
+
+  reminderTimers.set(reminder.id, timer)
+
+  console.log(
+    `Scheduled daily "${reminder.message}" for`,
+    nextReminder
+  )
+}
+function scheduleWeeklyReminder(reminder: ReminderData) {
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  }
+
+  const selectedDays = reminder.days
+    .map((day) => dayMap[day])
+    .filter((day) => day !== undefined)
+
+  if (selectedDays.length === 0) {
+    console.log("No valid days selected")
+    return
+  }
+
+  const [hours, minutes] = reminder.time
+    .split(":")
+    .map(Number)
+
+  const now = new Date()
+
+  let nextReminder: Date | null = null
+
+  // Check today + next 7 days
+  for (let offset = 0; offset <= 7; offset++) {
+    const candidate = new Date(now)
+
+    candidate.setDate(now.getDate() + offset)
+    candidate.setHours(hours, minutes, 0, 0)
+
+    const isSelectedDay =
+      selectedDays.includes(candidate.getDay())
+
+    const isFuture =
+      candidate.getTime() > now.getTime()
+
+    if (isSelectedDay && isFuture) {
+      nextReminder = candidate
+      break
+    }
+  }
+
+  if (!nextReminder) {
+    console.log("Could not find next weekly occurrence")
+    return
+  }
+
+  const delay =
+    nextReminder.getTime() - now.getTime()
+
+  const timer = setTimeout(() => {
+    console.log(
+      "WEEKLY REMINDER:",
+      reminder.message
+    )
+
+    showReminderAlert(reminder)
+
+    // Find and schedule the next selected weekday
+    scheduleWeeklyReminder(reminder)
+  }, delay)
+
+  reminderTimers.set(reminder.id, timer)
+
+  console.log(
+    `Scheduled weekly "${reminder.message}" for`,
+    nextReminder.toLocaleString()
+  )
+}
+
+function scheduleReminder(reminder: ReminderData) {
+  switch (reminder.repeat) {
+    case "once":
+      scheduleOnceReminder(reminder)
+      break
+
+    case "daily":
+      scheduleDailyReminder(reminder)
+      break
+
+    case "weekly":
+      scheduleWeeklyReminder(reminder)
+      break
+
+    default:
+      console.log(
+        "Unsupported repeat type:",
+        reminder.repeat
+      )
+  }
+}
+
 ipcMain.handle(
   "save-reminder",
   (_, reminder: Omit<ReminderData, "id">) => {
@@ -177,9 +307,7 @@ ipcMain.handle(
 
     reminders.push(savedReminder)
 
-    if (savedReminder.repeat === "once") {
-      scheduleOnceReminder(savedReminder)
-    }
+    scheduleReminder(savedReminder)
 
     console.log("Saved reminder:", savedReminder)
 
@@ -311,7 +439,6 @@ ipcMain.handle("set-fixed-message", (_, message: string) => {
 ipcMain.handle("get-fixed-message", () => {
   return fixedMessage;
 });
-
 ipcMain.on("dismiss-reminder-alert", () => {
   if (
     reminderAlertWin &&
@@ -504,16 +631,16 @@ function createReminderWindow() {
   })
 }
 
-
+const reminderAlertQueue: ReminderData[] = []
 function showReminderAlert(reminder: ReminderData) {
   if (!win || win.isDestroyed()) return
 
-  // For now, only show one active alert at a time
   if (
     reminderAlertWin &&
     !reminderAlertWin.isDestroyed()
   ) {
-    reminderAlertWin.close()
+    reminderAlertQueue.push(reminder)
+    return
   }
 
   const catBounds = win.getBounds()
@@ -563,6 +690,12 @@ function showReminderAlert(reminder: ReminderData) {
 
   reminderAlertWin.on("closed", () => {
     reminderAlertWin = null
+  
+    const nextReminder = reminderAlertQueue.shift()
+  
+    if (nextReminder) {
+      showReminderAlert(nextReminder)
+    }
   })
 }
 // Quit when all windows are closed, except on macOS. There, it's common
