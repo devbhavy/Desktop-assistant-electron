@@ -10,6 +10,44 @@ export function Reminder() {
 
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
+    async function handleSave() {
+      if (!message.trim()) {
+        console.log("Reminder message is required")
+        return
+      }
+    
+      if (!time) {
+        console.log("Reminder time is required")
+        return
+      }
+    
+      if (repeat === "once" && !date) {
+        console.log("Date is required for one-time reminders")
+        return
+      }
+    
+      if (repeat === "weekly" && selectedDays.length === 0) {
+        console.log("Select at least one day")
+        return
+      }
+    
+      const reminder = {
+        message: message.trim(),
+        time,
+        repeat,
+        date,
+        days: selectedDays,
+      }
+    
+      const success =
+        await window.electronAPI.saveReminder(reminder)
+    
+      if (success) {
+        handleReset()
+        window.electronAPI.closeReminderWindow()
+      }
+    }
+
     function handleReset() {
         setTime("")
         setDate("")
@@ -37,9 +75,14 @@ export function Reminder() {
             Reminder
           </h1>
 
-          <button className="bg-black px-3 py-2 font-mono font-bold text-white">
-            Close
-          </button>
+          <button
+              onClick={() =>
+                window.electronAPI.closeReminderWindow()
+              }
+              className="bg-black px-3 py-2 font-mono font-bold text-white"
+            >
+              Close
+            </button>
         </div>
 
         {/* Reminder options */}
@@ -89,7 +132,7 @@ export function Reminder() {
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
-                    className={`border-[2px] border-black px-2 py-1 font-mono text-sm font-bold ${
+                    className={`border-2 border-black px-2 py-1 font-mono text-sm font-bold ${
                     selectedDays.includes(day)
                         ? "bg-black text-white"
                         : "bg-white text-black"
@@ -121,9 +164,12 @@ export function Reminder() {
             Reset
           </button>
 
-          <button className="bg-black px-3 py-2 font-mono font-bold text-white">
-            Save
-          </button>
+          <button
+              onClick={handleSave}
+              className="bg-black px-3 py-2 font-mono font-bold text-white"
+            >
+              Save
+            </button>
         </div>
 
         <p className="mt-2 font-mono text-xs text-gray-500">

@@ -5,6 +5,7 @@ import { Typing } from "./components/Typing";
 import { Hover } from "./components/Hover";
 import { FixedMessage } from "./components/FixedMessage";
 import { Reminder } from "./components/Reminder";
+import { ReminderAlert } from "./components/ReminderAlert";
 
 
 export type CatSpriteProps = {
@@ -95,6 +96,9 @@ function App(){
       <FixedMessage/>
       
     );
+  }
+  if (window.location.hash === "#/reminder-alert") {
+    return <ReminderAlert />
   }
 
   if(isReminderWindow){

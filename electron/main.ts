@@ -20,7 +20,8 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 let win: BrowserWindow | null
 let messageWin: BrowserWindow | null = null;
-let reminderWin: BrowserWindow | null = null
+let reminderWin: BrowserWindow | null = null;
+let reminderAlertWin: BrowserWindow | null = null
 
 const MESSAGE_OFFSET_X = -45;
 const MESSAGE_OFFSET_Y = -100;
@@ -33,7 +34,11 @@ const REMINDER_OFFSET_X = -45;
 const REMINDER_OFFSET_Y = -250;
 const REMINDER_WIDTH = 470;
 const REMINDER_HEIGHT = 230;
+const ALERT_WIDTH = 320
+const ALERT_HEIGHT = 110
 
+const ALERT_OFFSET_X = -80
+const ALERT_OFFSET_Y = -120
 
 ipcMain.handle('read-clipboard-text', () => {
   return clipboard.readText()
@@ -124,7 +129,76 @@ ipcMain.on("stop-drag", () => {
 });
 let fixedMessage = "";
 
+type ReminderData = {
+  id: string
+  message: string
+  time: string
+  repeat: string
+  date: string
+  days: string[]
+}
+const reminders: ReminderData[] = []
 
+function scheduleOnceReminder(reminder: ReminderData) {
+  const reminderDate = new Date(
+    `${reminder.date}T${reminder.time}:00`
+  )
+
+  const delay =
+    reminderDate.getTime() - Date.now()
+
+  if (delay <= 0) {
+    console.log("Reminder time is already in the past")
+    return
+  }
+
+  const timer = setTimeout(() => {
+    console.log("REMINDER:", reminder.message)
+    showReminderAlert(reminder)
+
+    reminderTimers.delete(reminder.id)
+  }, delay)
+
+  reminderTimers.set(reminder.id, timer)
+
+  console.log(
+    `Scheduled "${reminder.message}" for`,
+    reminderDate
+  )
+}
+
+ipcMain.handle(
+  "save-reminder",
+  (_, reminder: Omit<ReminderData, "id">) => {
+    const savedReminder: ReminderData = {
+      ...reminder,
+      id: crypto.randomUUID(),
+    }
+
+    reminders.push(savedReminder)
+
+    if (savedReminder.repeat === "once") {
+      scheduleOnceReminder(savedReminder)
+    }
+
+    console.log("Saved reminder:", savedReminder)
+
+    return true
+  }
+)
+
+ipcMain.on("close-reminder-window", () => {
+  if (
+    reminderWin &&
+    !reminderWin.isDestroyed()
+  ) {
+    reminderWin.close()
+  }
+})
+
+
+
+const reminderTimers = new Map<string, NodeJS.Timeout>()
 
 ipcMain.on("show-cat-menu", (event) => {
   const targetWindow =
@@ -238,7 +312,14 @@ ipcMain.handle("get-fixed-message", () => {
   return fixedMessage;
 });
 
-
+ipcMain.on("dismiss-reminder-alert", () => {
+  if (
+    reminderAlertWin &&
+    !reminderAlertWin.isDestroyed()
+  ) {
+    reminderAlertWin.close()
+  }
+})
 
 
 function createWindow() {
@@ -388,8 +469,6 @@ function createReminderWindow() {
 
 
   const catBounds = win.getBounds();
-    // x: catBounds.x + MESSAGE_OFFSET_X,
-    // y: catBounds.y + MESSAGE_OFFSET_Y,
 
 
   reminderWin = new BrowserWindow({
@@ -422,6 +501,68 @@ function createReminderWindow() {
 
   reminderWin.on("closed", () => {
     reminderWin = null
+  })
+}
+
+
+function showReminderAlert(reminder: ReminderData) {
+  if (!win || win.isDestroyed()) return
+
+  // For now, only show one active alert at a time
+  if (
+    reminderAlertWin &&
+    !reminderAlertWin.isDestroyed()
+  ) {
+    reminderAlertWin.close()
+  }
+
+  const catBounds = win.getBounds()
+
+  reminderAlertWin = new BrowserWindow({
+    width: ALERT_WIDTH,
+    height: ALERT_HEIGHT,
+
+    x: catBounds.x + ALERT_OFFSET_X,
+    y: catBounds.y + ALERT_OFFSET_Y,
+
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    reminderAlertWin.loadURL(
+      `${VITE_DEV_SERVER_URL}#/reminder-alert`
+    )
+  } else {
+    reminderAlertWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      {
+        hash: "/reminder-alert",
+      }
+    )
+  }
+
+  reminderAlertWin.webContents.on(
+    "did-finish-load",
+    () => {
+      reminderAlertWin?.webContents.send(
+        "reminder-triggered",
+        reminder
+      )
+    }
+  )
+
+  reminderAlertWin.on("closed", () => {
+    reminderAlertWin = null
   })
 }
 // Quit when all windows are closed, except on macOS. There, it's common

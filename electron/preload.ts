@@ -88,5 +88,42 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   getFixedMessage: () =>
     ipcRenderer.invoke("get-fixed-message"),
+  saveReminder: (reminder: {
+    message: string
+    time: string
+    repeat: string
+    date: string
+    days: string[]
+  }) => ipcRenderer.invoke("save-reminder", reminder),
+  
+  closeReminderWindow: () =>
+    ipcRenderer.send("close-reminder-window"),
+
+  onReminderTriggered: (
+    callback: (reminder: {
+      id: string
+      message: string
+      time: string
+      repeat: string
+      date: string
+      days: string[]
+    }) => void
+  ) => {
+    const listener = (_event: unknown, reminder: any) => {
+      callback(reminder)
+    }
+  
+    ipcRenderer.on("reminder-triggered", listener)
+  
+    return () => {
+      ipcRenderer.removeListener(
+        "reminder-triggered",
+        listener
+      )
+    }
+  },
+  
+  dismissReminderAlert: () =>
+    ipcRenderer.send("dismiss-reminder-alert"),
 });
 

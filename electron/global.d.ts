@@ -29,6 +29,27 @@ declare global {
       ) => () => void;
       setFixedMessage: (message: string) => Promise<any>
       getFixedMessage: () => Promise<any>
+      saveReminder: (reminder: {
+        message: string
+        time: string
+        repeat: string
+        date: string
+        days: string[]
+      }) => Promise<boolean>
+      
+      closeReminderWindow: () => void
+      onReminderTriggered: (
+        callback: (reminder: {
+          id: string
+          message: string
+          time: string
+          repeat: string
+          date: string
+          days: string[]
+        }) => void
+      ) => () => void
+      
+      dismissReminderAlert: () => void
     };
   }
 }
