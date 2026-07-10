@@ -146,5 +146,49 @@ contextBridge.exposeInMainWorld("electronAPI", {
       minutes
     )
   },
+  getSettings: () =>
+    ipcRenderer.invoke("get-settings"),
+  
+  setAlwaysOnTop: (value: boolean) =>
+    ipcRenderer.send(
+      "set-always-on-top",
+      value
+    ),
+  
+  setCatSkin: (
+    skin: "orange" | "black" | "white"
+  ) =>
+    ipcRenderer.send(
+      "set-cat-skin",
+      skin
+    ),
+  
+  onCatSkinChanged: (
+    callback: (
+      skin: "orange" | "black" | "white"
+    ) => void
+  ) => {
+    const listener = (
+      _event: Electron.IpcRendererEvent,
+      skin: "orange" | "black" | "white"
+    ) => {
+      callback(skin)
+    }
+  
+    ipcRenderer.on(
+      "cat-skin-changed",
+      listener
+    )
+  
+    return () => {
+      ipcRenderer.removeListener(
+        "cat-skin-changed",
+        listener
+      )
+    }
+  },
+  closeSettingsWindow: () => {
+    ipcRenderer.send("close-settings-window")
+  },
 });
 

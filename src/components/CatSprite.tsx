@@ -1,10 +1,43 @@
+import { useEffect, useState } from "react";
 import { CatSpriteProps } from "../App";
+import { CatSkin } from "./Settings";
 
 export function CatSprite({
     row,
     col,
     scale = 3,
-  }: CatSpriteProps & { scale?: number }) {
+    skin = "black"
+  }: CatSpriteProps & { scale?: number } &{skin : CatSkin}) {
+
+
+    const mapping : Record<CatSkin,string> = {
+      "black" : "cat-spritesheet-1",
+      "orange" : "cat-spritesheet-3",
+      "white" : "cat-spritesheet-2"
+    }
+
+
+    // const [skin,setSkin] = useState<CatSkin>();
+    // useEffect(() => {
+    //   const loadSettings = async () => {
+    //     const settings =
+    //       await window.electronAPI.getSettings()
+    
+    //     setSkin(settings.skin)
+    //   }
+    
+    //   loadSettings()
+    
+    //   const cleanup =
+    //     window.electronAPI.onCatSkinChanged(
+    //       (newSkin) => {
+    //         setSkin(newSkin)
+    //       }
+    //     )
+    
+    //   return cleanup
+    // }, [])
+
     return (
       <div
         style={{
@@ -12,11 +45,11 @@ export function CatSprite({
           height: 64 * scale,
         }}
       >
-        <div
+        {skin && <div
           style={{
             width: 64,
             height: 64,
-            backgroundImage: `url("/src/assets/cat-spritesheet-3.png")`,
+            backgroundImage: `url("/src/assets/${mapping[skin]}.png")`,
             backgroundPosition: `${-col * 64}px ${-row * 64}px`,
             backgroundRepeat: "no-repeat",
             imageRendering: "pixelated",
@@ -24,7 +57,7 @@ export function CatSprite({
             transformOrigin: "top left",
             objectFit : "fill"
           }}
-        />
+        />}
       </div>
     );
   }

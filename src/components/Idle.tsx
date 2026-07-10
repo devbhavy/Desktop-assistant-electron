@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { CatSprite } from "./CatSprite";
+import { CatSkin } from "./Settings";
 
 
-export function Idle(){
+export function Idle({skin} : {skin :CatSkin}){
 
     type idleSubState = "tailwag"|"lick"|"scratch_left"|"scratch_right"|"yawn";
   
@@ -70,6 +71,6 @@ export function Idle(){
     }
   
     return(
-      <CatSprite row={row} col={col} />
+      <CatSprite skin={skin} row={row} col={col} />
     )
   }

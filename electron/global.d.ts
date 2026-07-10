@@ -66,6 +66,25 @@ declare global {
       startBreakStretch: (
         minutes: number
       ) => void
+      getSettings: () => Promise<{
+        alwaysOnTop: boolean
+        skin: "orange" | "black" | "white"
+      }>
+      
+      setAlwaysOnTop: (
+        value: boolean
+      ) => void
+      
+      setCatSkin: (
+        skin: "orange" | "black" | "white"
+      ) => void
+      
+      onCatSkinChanged: (
+        callback: (
+          skin: "orange" | "black" | "white"
+        ) => void
+      ) => () => void
+      closeSettingsWindow: () => void
     };
   }
 }

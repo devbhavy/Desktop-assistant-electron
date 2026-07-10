@@ -1,7 +1,8 @@
 import { CatSprite } from "./CatSprite";
 import { PixelHeart } from "./heart/Heart";
+import { CatSkin } from "./Settings";
 
-export function Hover(){
+export function Hover({skin} : {skin :CatSkin}){
 
 
     return(
@@ -9,7 +10,7 @@ export function Hover(){
             <div className="absolute top-8 left-8">
             <PixelHeart/>
             </div>  
-            <CatSprite row={43} col={1} />
+            <CatSprite skin={skin} row={43} col={1} />
         </div>
           
     )

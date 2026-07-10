@@ -9,6 +9,7 @@ import { ReminderAlert } from "./components/ReminderAlert";
 import { Pomodoro } from "./components/Pomodoro";
 import { PomodoroSetup } from "./components/PomodoroSetup";
 import { BreakStretchSetup } from "./components/BreakStreachSetup";
+import { CatSkin, Settings } from "./components/Settings";
 
 
 
@@ -77,6 +78,28 @@ function App(){
     return cleanup;
   }, []);
 
+  const [skin, setSkin] = useState<CatSkin>("black")
+
+    useEffect(() => {
+      const loadSkin = async () => {
+        const settings =
+          await window.electronAPI.getSettings()
+
+        setSkin(settings.skin)
+      }
+
+      loadSkin()
+
+      const cleanup =
+        window.electronAPI.onCatSkinChanged(
+          (newSkin) => {
+            setSkin(newSkin)
+          }
+        )
+
+      return cleanup
+    }, [])
+
   // useEffect(()=>{
   //   console.log(currentState)
   // },[currentState])
@@ -122,6 +145,11 @@ function App(){
   ) {
     return <BreakStretchSetup />
   }
+  if (
+    window.location.hash === "#/settings"
+  ) {
+    return <Settings />
+  }
   
 
 
@@ -143,13 +171,13 @@ function App(){
 
         <div className="absolute left-[-16px] top-[-16px] pointer-events-none">
         {currentState === "idle" ? (
-          <Idle />
+          <Idle skin={skin} />
         ) : currentState === "typing" ? (
-          <Typing />
+          <Typing skin={skin} />
         ) : currentState === "hover" ? (
-          <Hover/>
+          <Hover skin={skin}/>
         ) : (
-          <CatSprite row={65} col={2} />
+          <CatSprite skin={skin} row={65} col={2} />
         )}
 
         </div>

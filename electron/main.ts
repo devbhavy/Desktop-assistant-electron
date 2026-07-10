@@ -22,6 +22,13 @@ let win: BrowserWindow | null
 let messageWin: BrowserWindow | null = null;
 let reminderWin: BrowserWindow | null = null;
 let reminderAlertWin: BrowserWindow | null = null
+let pomodoroSetupWin: BrowserWindow | null = null
+
+const POMODORO_SETUP_WIDTH = 300
+const POMODORO_SETUP_HEIGHT = 220
+const POMODORO_SETUP_OFFSET_Y = -280
+const POMODORO_SETUP_OFFSET_X = -280
+
 
 const MESSAGE_OFFSET_X = -45;
 const MESSAGE_OFFSET_Y = -100;
@@ -66,6 +73,21 @@ let breakStretchSetupWin: BrowserWindow | null = null
 
 const BREAK_STRETCH_WIDTH = 300
 const BREAK_STRETCH_HEIGHT = 170
+const BREAK_STRETCH_OFFSET_Y = -80
+const BREAK_STRETCH_OFFSET_X = -380
+
+
+let settingsWin: BrowserWindow | null = null
+
+const SETTINGS_WIDTH = 360
+const SETTINGS_HEIGHT = 280
+const SETTINGS_OFFSET_Y = -80
+const SETTINGS_OFFSET_X = -380
+
+type CatSkin = "orange" | "black" | "white"
+
+let currentSkin: CatSkin = "orange"
+let alwaysOnTop = true
 
 ipcMain.on("start-drag", (event) => {
   const targetWindow =
@@ -156,6 +178,43 @@ ipcMain.on("start-drag", (event) => {
         height: POMODORO_HEIGHT,
       });
     }
+
+    if (
+      pomodoroSetupWin &&
+      !pomodoroSetupWin.isDestroyed()
+    ) {
+      pomodoroSetupWin.setBounds({
+        x: catX + POMODORO_SETUP_OFFSET_X,
+        y: catY + POMODORO_SETUP_OFFSET_Y,
+        width: POMODORO_SETUP_WIDTH,
+        height: POMODORO_SETUP_HEIGHT,
+      });
+    }
+    if (
+      settingsWin &&
+      !settingsWin.isDestroyed()
+    ) {
+      settingsWin.setBounds({
+        x: catX + SETTINGS_OFFSET_X,
+        y: catY + SETTINGS_OFFSET_Y,
+        width: SETTINGS_WIDTH,
+        height: SETTINGS_HEIGHT,
+      });
+    }
+
+    if (
+      breakStretchSetupWin &&
+      !breakStretchSetupWin.isDestroyed()
+    ) {
+      breakStretchSetupWin.setBounds({
+        x: catX + BREAK_STRETCH_OFFSET_X,
+        y: catY + BREAK_STRETCH_OFFSET_Y,
+        width: BREAK_STRETCH_WIDTH,
+        height: BREAK_STRETCH_HEIGHT,
+      });
+    }
+
+    
   }, 16);
 });
 
@@ -487,9 +546,9 @@ ipcMain.on("show-cat-menu", (event) => {
     {
       label: "Settings",
       click: () => {
-        console.log("Settings clicked");
+        createSettingsWindow()
       },
-    },
+    }
   ]);
 
   menu.popup({
@@ -521,6 +580,36 @@ ipcMain.on("show-cat-menu", (event) => {
     },
   });
 });
+
+
+ipcMain.handle("get-settings", () => {
+  return {
+    alwaysOnTop,
+    skin: currentSkin,
+  }
+})
+ipcMain.on(
+  "set-always-on-top",
+  (_event, value: boolean) => {
+    alwaysOnTop = value
+
+    if (win && !win.isDestroyed()) {
+      win.setAlwaysOnTop(value)
+    }
+  }
+)
+
+ipcMain.on(
+  "set-cat-skin",
+  (_event, skin: CatSkin) => {
+    currentSkin = skin
+
+    win?.webContents.send(
+      "cat-skin-changed",
+      skin
+    )
+  }
+)
 
 
 ipcMain.handle("set-fixed-message", (_, message: string) => {
@@ -574,6 +663,14 @@ ipcMain.handle("complete-pomodoro-phase", () => {
   }
 })
 
+ipcMain.on("close-settings-window", () => {
+  if (
+    settingsWin &&
+    !settingsWin.isDestroyed()
+  ) {
+    settingsWin.close()
+  }
+})
 
 ipcMain.on(
   "start-break-stretch",
@@ -901,15 +998,6 @@ function createPomodoroWindow() {
 }
 
 
-
-
-
-let pomodoroSetupWin: BrowserWindow | null = null
-
-const POMODORO_SETUP_WIDTH = 300
-const POMODORO_SETUP_HEIGHT = 220
-
-
 type PomodoroPhase = "focus" | "break"
 
 type PomodoroConfig = {
@@ -922,6 +1010,9 @@ let pomodoroEndTime: number | null = null
 let pomodoroPhase: PomodoroPhase = "focus"
 
 function createPomodoroSetupWindow() {
+  if (!win) return
+
+  const catBounds = win.getBounds()
   if (pomodoroSetupWin && !pomodoroSetupWin.isDestroyed()) {
     pomodoroSetupWin.focus()
     return
@@ -930,6 +1021,12 @@ function createPomodoroSetupWindow() {
   pomodoroSetupWin = new BrowserWindow({
     width: POMODORO_SETUP_WIDTH,
     height: POMODORO_SETUP_HEIGHT,
+    x:
+      catBounds.x +
+      POMODORO_SETUP_OFFSET_X,
+
+    y: catBounds.y + POMODORO_SETUP_OFFSET_Y,
+    
     frame: false,
     resizable: false,
     alwaysOnTop: true,
@@ -960,6 +1057,9 @@ function createPomodoroSetupWindow() {
 
 
 function createBreakStretchSetupWindow() {
+  if (!win) return
+
+  const catBounds = win.getBounds()
   if (
     breakStretchSetupWin &&
     !breakStretchSetupWin.isDestroyed()
@@ -971,6 +1071,8 @@ function createBreakStretchSetupWindow() {
   breakStretchSetupWin = new BrowserWindow({
     width: BREAK_STRETCH_WIDTH,
     height: BREAK_STRETCH_HEIGHT,
+    x : catBounds.x + BREAK_STRETCH_OFFSET_X,
+    y : catBounds.y + BREAK_STRETCH_OFFSET_Y,
     frame: false,
     resizable: false,
     alwaysOnTop: true,
@@ -995,6 +1097,63 @@ function createBreakStretchSetupWindow() {
 
   breakStretchSetupWin.on("closed", () => {
     breakStretchSetupWin = null
+  })
+}
+
+
+
+function createSettingsWindow() {
+  if (!win) return
+
+  const catBounds = win.getBounds()
+
+  if (
+    settingsWin &&
+    !settingsWin.isDestroyed()
+  ) {
+    settingsWin.focus()
+    return
+  }
+  
+
+  settingsWin = new BrowserWindow({
+    width: SETTINGS_WIDTH,
+    height: SETTINGS_HEIGHT,
+    x:
+      catBounds.x +
+      SETTINGS_OFFSET_X,
+
+    y: catBounds.y + SETTINGS_OFFSET_Y,
+
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+
+    webPreferences: {
+      preload: path.join(
+        __dirname,
+        "preload.mjs"
+      ),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    settingsWin.loadURL(
+      `${VITE_DEV_SERVER_URL}#/settings`
+    )
+  } else {
+    settingsWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      {
+        hash: "settings",
+      }
+    )
+  }
+
+  settingsWin.on("closed", () => {
+    settingsWin = null
   })
 }
 // Quit when all windows are closed, except on macOS. There, it's common
