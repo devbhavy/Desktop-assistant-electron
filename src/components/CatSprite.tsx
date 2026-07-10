@@ -16,7 +16,7 @@ export function CatSprite({
           style={{
             width: 64,
             height: 64,
-            backgroundImage: `url("/src/assets/cat-spritesheet.png")`,
+            backgroundImage: `url("/src/assets/cat-spritesheet-3.png")`,
             backgroundPosition: `${-col * 64}px ${-row * 64}px`,
             backgroundRepeat: "no-repeat",
             imageRendering: "pixelated",

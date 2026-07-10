@@ -53,6 +53,19 @@ let dragOffsetY = 0;
 let fixedWidth = 0;
 let fixedHeight = 0;
 
+let pomodoroWin: BrowserWindow | null = null
+
+const POMODORO_WIDTH = 160
+const POMODORO_HEIGHT = 70
+const POMODORO_OFFSET_Y = -80
+const POMODORO_OFFSET_X = -80
+
+let breakStretchInterval: NodeJS.Timeout | null = null
+let breakStretchMinutes: number | null = null
+let breakStretchSetupWin: BrowserWindow | null = null
+
+const BREAK_STRETCH_WIDTH = 300
+const BREAK_STRETCH_HEIGHT = 170
 
 ipcMain.on("start-drag", (event) => {
   const targetWindow =
@@ -118,6 +131,31 @@ ipcMain.on("start-drag", (event) => {
         height: REMINDER_HEIGHT,
       });
     }
+
+
+    if (
+      reminderAlertWin &&
+      !reminderAlertWin.isDestroyed()
+    ) {
+      reminderAlertWin.setBounds({
+        x: catX + ALERT_OFFSET_X,
+        y: catY + ALERT_OFFSET_Y,
+        width: ALERT_WIDTH,
+        height: ALERT_HEIGHT,
+      });
+    }
+
+    if (
+      pomodoroWin &&
+      !pomodoroWin.isDestroyed()
+    ) {
+      pomodoroWin.setBounds({
+        x: catX + POMODORO_OFFSET_X,
+        y: catY + POMODORO_OFFSET_Y,
+        width: POMODORO_WIDTH,
+        height: POMODORO_HEIGHT,
+      });
+    }
   }, 16);
 });
 
@@ -127,6 +165,22 @@ ipcMain.on("stop-drag", () => {
     dragTimer = null;
   }
 });
+
+
+ipcMain.on(
+  "start-pomodoro",
+  (_event, config: PomodoroConfig) => {
+    pomodoroConfig = config
+    pomodoroPhase = "focus"
+
+    pomodoroEndTime =
+      Date.now() +
+      config.focusMinutes * 60 * 1000
+
+    pomodoroSetupWin?.close()
+    createPomodoroWindow()
+  }
+)
 let fixedMessage = "";
 
 type ReminderData = {
@@ -263,7 +317,7 @@ function scheduleWeeklyReminder(reminder: ReminderData) {
 
     showReminderAlert(reminder)
 
-    // Find and schedule the next selected weekday
+
     scheduleWeeklyReminder(reminder)
   }, delay)
 
@@ -336,12 +390,7 @@ ipcMain.on("show-cat-menu", (event) => {
 
   const fixedMessageItems = fixedMessage
     ? [
-        // {
-        //   label: "Fixed message",
-        //   click: () => {
-        //     createMessageWindow();
-        //   },
-        // },
+
         {
           label: "Remove fixed message",
           click: () => {
@@ -365,6 +414,62 @@ ipcMain.on("show-cat-menu", (event) => {
         },
       ];
 
+
+      const pomodoroItems = (
+        pomodoroEndTime !== null &&
+        pomodoroEndTime > Date.now()
+      )
+        ? [
+            {
+              label: "Remove Pomodoro",
+              click: () => {
+                pomodoroEndTime = null
+                pomodoroConfig = null
+                pomodoroPhase = "focus"
+      
+                if (
+                  pomodoroWin &&
+                  !pomodoroWin.isDestroyed()
+                ) {
+                  pomodoroWin.close()
+                }
+              },
+            },
+          ]
+        : [
+            {
+              label: "Start Pomodoro",
+              click: () => {
+                createPomodoroSetupWindow()
+              },
+            },
+          ]
+          const breakStretchItems =
+          breakStretchInterval
+            ? [
+                {
+                  label: "Remove Break Stretch",
+                  click: () => {
+                    if (breakStretchInterval) {
+                      clearInterval(
+                        breakStretchInterval
+                      )
+                    }
+        
+                    breakStretchInterval = null
+                    breakStretchMinutes = null
+                  },
+                },
+              ]
+            : [
+                {
+                  label: "Start Break Stretch",
+                  click: () => {
+                    createBreakStretchSetupWindow()
+                  },
+                },
+              ]
+
   const menu = Menu.buildFromTemplate([
     ...fixedMessageItems,
 
@@ -374,18 +479,8 @@ ipcMain.on("show-cat-menu", (event) => {
         createReminderWindow()
       },
     },
-    {
-      label: "Pomodoro",
-      click: () => {
-        console.log("Pomodoro clicked");
-      },
-    },
-    {
-      label: "Break Stretch",
-      click: () => {
-        console.log("Break Stretch clicked");
-      },
-    },
+    ...pomodoroItems,
+    ...breakStretchItems,
     {
       type: "separator",
     },
@@ -448,6 +543,61 @@ ipcMain.on("dismiss-reminder-alert", () => {
   }
 })
 
+ipcMain.handle("get-pomodoro-state", () => {
+  return {
+    endTime: pomodoroEndTime,
+    phase: pomodoroPhase,
+  }
+})
+
+
+ipcMain.handle("complete-pomodoro-phase", () => {
+  if (!pomodoroConfig) return null
+
+  if (pomodoroPhase === "focus") {
+    pomodoroPhase = "break"
+
+    pomodoroEndTime =
+      Date.now() +
+      pomodoroConfig.breakMinutes * 60 * 1000
+  } else {
+    pomodoroPhase = "focus"
+
+    pomodoroEndTime =
+      Date.now() +
+      pomodoroConfig.focusMinutes * 60 * 1000
+  }
+
+  return {
+    endTime: pomodoroEndTime,
+    phase: pomodoroPhase,
+  }
+})
+
+
+ipcMain.on(
+  "start-break-stretch",
+  (_event, minutes: number) => {
+    if (breakStretchInterval) {
+      clearInterval(breakStretchInterval)
+    }
+
+    breakStretchMinutes = minutes
+
+    breakStretchInterval = setInterval(() => {
+      showReminderAlert({
+        id: crypto.randomUUID(),
+        message: "Time to stretch!",
+        time: "",
+        repeat: "break-stretch",
+        date: "",
+        days: [],
+      })
+    }, minutes * 60 * 1000)
+
+    breakStretchSetupWin?.close()
+  }
+)
 
 function createWindow() {
 
@@ -696,6 +846,155 @@ function showReminderAlert(reminder: ReminderData) {
     if (nextReminder) {
       showReminderAlert(nextReminder)
     }
+  })
+}
+
+
+
+function createPomodoroWindow() {
+  if (!win) return
+
+  if (pomodoroWin && !pomodoroWin.isDestroyed()) {
+    pomodoroWin.show()
+    return
+  }
+
+  const catBounds = win.getBounds()
+
+  pomodoroWin = new BrowserWindow({
+    width: POMODORO_WIDTH,
+    height: POMODORO_HEIGHT,
+
+    x:
+      catBounds.x +
+      POMODORO_OFFSET_X,
+
+    y: catBounds.y + POMODORO_OFFSET_Y,
+
+    transparent: true,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    pomodoroWin.loadURL(
+      `${VITE_DEV_SERVER_URL}#/pomodoro`
+    )
+  } else {
+    pomodoroWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      {
+        hash: "pomodoro",
+      }
+    )
+  }
+
+  pomodoroWin.on("closed", () => {
+    pomodoroWin = null
+  })
+}
+
+
+
+
+
+let pomodoroSetupWin: BrowserWindow | null = null
+
+const POMODORO_SETUP_WIDTH = 300
+const POMODORO_SETUP_HEIGHT = 220
+
+
+type PomodoroPhase = "focus" | "break"
+
+type PomodoroConfig = {
+  focusMinutes: number
+  breakMinutes: number
+}
+
+let pomodoroConfig: PomodoroConfig | null = null
+let pomodoroEndTime: number | null = null
+let pomodoroPhase: PomodoroPhase = "focus"
+
+function createPomodoroSetupWindow() {
+  if (pomodoroSetupWin && !pomodoroSetupWin.isDestroyed()) {
+    pomodoroSetupWin.focus()
+    return
+  }
+
+  pomodoroSetupWin = new BrowserWindow({
+    width: POMODORO_SETUP_WIDTH,
+    height: POMODORO_SETUP_HEIGHT,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    pomodoroSetupWin.loadURL(
+      `${VITE_DEV_SERVER_URL}#/pomodoro-setup`
+    )
+  } else {
+    pomodoroSetupWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      {
+        hash: "pomodoro-setup",
+      }
+    )
+  }
+
+  pomodoroSetupWin.on("closed", () => {
+    pomodoroSetupWin = null
+  })
+}
+
+
+
+function createBreakStretchSetupWindow() {
+  if (
+    breakStretchSetupWin &&
+    !breakStretchSetupWin.isDestroyed()
+  ) {
+    breakStretchSetupWin.focus()
+    return
+  }
+
+  breakStretchSetupWin = new BrowserWindow({
+    width: BREAK_STRETCH_WIDTH,
+    height: BREAK_STRETCH_HEIGHT,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+    },
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    breakStretchSetupWin.loadURL(
+      `${VITE_DEV_SERVER_URL}#/break-stretch-setup`
+    )
+  } else {
+    breakStretchSetupWin.loadFile(
+      path.join(RENDERER_DIST, "index.html"),
+      {
+        hash: "break-stretch-setup",
+      }
+    )
+  }
+
+  breakStretchSetupWin.on("closed", () => {
+    breakStretchSetupWin = null
   })
 }
 // Quit when all windows are closed, except on macOS. There, it's common

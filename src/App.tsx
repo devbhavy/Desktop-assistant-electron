@@ -6,6 +6,10 @@ import { Hover } from "./components/Hover";
 import { FixedMessage } from "./components/FixedMessage";
 import { Reminder } from "./components/Reminder";
 import { ReminderAlert } from "./components/ReminderAlert";
+import { Pomodoro } from "./components/Pomodoro";
+import { PomodoroSetup } from "./components/PomodoroSetup";
+import { BreakStretchSetup } from "./components/BreakStreachSetup";
+
 
 
 export type CatSpriteProps = {
@@ -73,9 +77,9 @@ function App(){
     return cleanup;
   }, []);
 
-  useEffect(()=>{
-    console.log(currentState)
-  },[currentState])
+  // useEffect(()=>{
+  //   console.log(currentState)
+  // },[currentState])
 
 
   // async function handleClick(){
@@ -106,6 +110,19 @@ function App(){
       <Reminder/>
     )
   }
+  if (window.location.hash === "#/pomodoro") {
+    return <Pomodoro />
+  }
+  if (window.location.hash === "#/pomodoro-setup") {
+    return <PomodoroSetup/>
+  }
+  if (
+    window.location.hash ===
+    "#/break-stretch-setup"
+  ) {
+    return <BreakStretchSetup />
+  }
+  
 
 
   return(
@@ -118,8 +135,8 @@ function App(){
           user is typing....!
         </div>:
         null
-      }
-      <button onClick={doSomething}>mimick action</button> */}
+      }*/}
+      
       <div
         className=" bg-amber-200 relative h-[160px] w-[160px] overflow-hidden"
         > 

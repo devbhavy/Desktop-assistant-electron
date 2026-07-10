@@ -50,6 +50,22 @@ declare global {
       ) => () => void
       
       dismissReminderAlert: () => void
+      getPomodoroEndTime: () => Promise<number | null>
+      startPomodoro: (
+        focusMinutes: number,
+        breakMinutes: number
+      ) => void
+      getPomodoroState: () => Promise<{
+        endTime: number | null
+        phase: "focus" | "break"
+      }>
+      completePomodoroPhase: () => Promise<{
+        endTime: number
+        phase: "focus" | "break"
+      } | null>
+      startBreakStretch: (
+        minutes: number
+      ) => void
     };
   }
 }

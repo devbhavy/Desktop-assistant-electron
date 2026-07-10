@@ -125,5 +125,26 @@ contextBridge.exposeInMainWorld("electronAPI", {
   
   dismissReminderAlert: () =>
     ipcRenderer.send("dismiss-reminder-alert"),
+  getPomodoroEndTime: () =>
+    ipcRenderer.invoke("get-pomodoro-end-time"),
+  startPomodoro: (
+    focusMinutes: number,
+    breakMinutes: number
+  ) => {
+    ipcRenderer.send("start-pomodoro", {
+      focusMinutes,
+      breakMinutes,
+    })
+  },
+  getPomodoroState: () =>
+    ipcRenderer.invoke("get-pomodoro-state"),
+  completePomodoroPhase: () =>
+    ipcRenderer.invoke("complete-pomodoro-phase"),
+  startBreakStretch: (minutes: number) => {
+    ipcRenderer.send(
+      "start-break-stretch",
+      minutes
+    )
+  },
 });
 
