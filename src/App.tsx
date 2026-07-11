@@ -10,6 +10,7 @@ import { Pomodoro } from "./components/Pomodoro";
 import { PomodoroSetup } from "./components/PomodoroSetup";
 import { BreakStretchSetup } from "./components/BreakStreachSetup";
 import { CatSkin, Settings } from "./components/Settings";
+import { Sleeping } from "./components/Sleeping";
 
 
 
@@ -19,14 +20,43 @@ export type CatSpriteProps = {
 }
 
 type currentState = "idle"|"typing"|"hover"|"holding"
-
+export type PomodoroPhase = "focus" | "break" | null
 
 
 function App(){
   
-  // const [data,setData] = useState("");
-  const [currentState,setCurrentState] = useState<currentState>("idle");
+  const [pomodoroPhase, setPomodoroPhase] =useState<PomodoroPhase>("focus")
 
+  const [currentState,setCurrentState] = useState<currentState>("idle");
+  useEffect(() => {
+    const cleanup =
+      window.electronAPI.onPomodoroPhaseChanged(
+        (phase) => {
+          setPomodoroPhase(phase)
+        }
+      )
+  
+    return cleanup
+  }, [])
+
+  const renderCat = () => {
+    switch (currentState) {
+      case "holding":
+        return <CatSprite skin={skin} row={65} col={2} />
+  
+      case "typing":
+        return <Typing skin={skin} />
+  
+      case "hover":
+        return <Hover pomodoroPhase={pomodoroPhase} skin={skin} />
+    }
+  
+    if (pomodoroPhase === "break") {
+      return <Sleeping skin={skin} />
+    }
+  
+    return <Idle skin={skin} />
+  }
   
   useEffect(() => {
     const cleanup =
@@ -45,28 +75,6 @@ function App(){
   const dragRef = useRef({
     isDragging: false,
   });
-  
-  
-  // const timeout = useRef<any>();
-  
-  // function doSomething(){
-  //   clearTimeout(timeout.current)
-  //   setCurrentState("typing");
-
-  //   timeout.current = setTimeout(()=>{
-  //     setCurrentState("idle");
-  //   },2000)
-  // }
-
-  // useEffect(()=>{
-  //   (async()=>{
-  //     const response = await window.electronAPI.readClipboard();
-  //     setData(response);
-      
-  //   })()
-    
-  // },[])
-
   
 
   useEffect(() => {
@@ -100,16 +108,6 @@ function App(){
       return cleanup
     }, [])
 
-  // useEffect(()=>{
-  //   console.log(currentState)
-  // },[currentState])
-
-
-  // async function handleClick(){
-  //   const response = await window.electronAPI.readClipboard();
-  //   setData(response);
-
-  // }
 
   const isFixedMessageWindow =
     window.location.hash === "#/fixed-message";
@@ -155,30 +153,13 @@ function App(){
 
   return(
     <div className=" flex flex-col items-center justify-center">
-      {/* <button onClick={handleClick}>Update text</button>
-      <div>Text : {data}</div>
-      <div>currentState : {currentState}</div>
-      {
-        currentState=="typing"?<div>
-          user is typing....!
-        </div>:
-        null
-      }*/}
       
       <div
-        className=" bg-amber-200 relative h-[160px] w-[160px] overflow-hidden"
+        className="relative h-[160px] w-[160px] overflow-hidden"
         > 
 
         <div className="absolute left-[-16px] top-[-16px] pointer-events-none">
-        {currentState === "idle" ? (
-          <Idle skin={skin} />
-        ) : currentState === "typing" ? (
-          <Typing skin={skin} />
-        ) : currentState === "hover" ? (
-          <Hover skin={skin}/>
-        ) : (
-          <CatSprite skin={skin} row={65} col={2} />
-        )}
+        {renderCat()}
 
         </div>
         <div

@@ -35,12 +35,12 @@ const POMODORO_SETUP_OFFSET_X = -280
 const MESSAGE_WIDTH = 320
 const MESSAGE_HEIGHT = 180
 
-const MESSAGE_OFFSET_X = -30
-const MESSAGE_OFFSET_Y = -180
+const MESSAGE_OFFSET_X = -80
+const MESSAGE_OFFSET_Y = -170
 
 
-const REMINDER_OFFSET_X = -45;
-const REMINDER_OFFSET_Y = -250;
+const REMINDER_OFFSET_X = -150;
+const REMINDER_OFFSET_Y = -220;
 const REMINDER_WIDTH = 470;
 const REMINDER_HEIGHT = 230;
 const ALERT_WIDTH = 320
@@ -160,8 +160,8 @@ let pomodoroWin: BrowserWindow | null = null
 
 const POMODORO_WIDTH = 160
 const POMODORO_HEIGHT = 70
-const POMODORO_OFFSET_Y = -80
-const POMODORO_OFFSET_X = -80
+const POMODORO_OFFSET_Y = -60
+const POMODORO_OFFSET_X = 0
 
 let breakStretchInterval: NodeJS.Timeout | null = null
 let breakStretchMinutes: number | null = null
@@ -327,6 +327,10 @@ ipcMain.on(
   (_event, config: PomodoroConfig) => {
     pomodoroConfig = config
     pomodoroPhase = "focus"
+    win?.webContents.send(
+      "pomodoro-phase-changed",
+      pomodoroPhase
+    )
 
     pomodoroEndTime =
       Date.now() +
@@ -619,6 +623,10 @@ ipcMain.on("show-cat-menu", (event) => {
                 pomodoroEndTime = null
                 pomodoroConfig = null
                 pomodoroPhase = "focus"
+                win?.webContents.send(
+                  "pomodoro-phase-changed",
+                  pomodoroPhase
+                )
       
                 if (
                   pomodoroWin &&
@@ -641,7 +649,7 @@ ipcMain.on("show-cat-menu", (event) => {
           breakStretchInterval
             ? [
                 {
-                  label: "Remove Break Stretch",
+                  label: "Remove Stretch Break",
                   click: () => {
                     if (breakStretchInterval) {
                       clearInterval(
@@ -657,7 +665,7 @@ ipcMain.on("show-cat-menu", (event) => {
               ]
             : [
                 {
-                  label: "Start Break Stretch",
+                  label: "Add Stretch Break",
                   click: () => {
                     createBreakStretchSetupWindow()
                   },
@@ -668,7 +676,7 @@ ipcMain.on("show-cat-menu", (event) => {
     ...fixedMessageItems,
 
     {
-      label: "Reminders",
+      label: "Reminder",
       click: () => {
         createReminderWindow()
       },
@@ -783,13 +791,19 @@ ipcMain.handle("complete-pomodoro-phase", () => {
 
   if (pomodoroPhase === "focus") {
     pomodoroPhase = "break"
-
+    win?.webContents.send(
+      "pomodoro-phase-changed",
+      pomodoroPhase
+    )
     pomodoroEndTime =
       Date.now() +
       pomodoroConfig.breakMinutes * 60 * 1000
   } else {
     pomodoroPhase = "focus"
-
+    win?.webContents.send(
+      "pomodoro-phase-changed",
+      pomodoroPhase
+    )
     pomodoroEndTime =
       Date.now() +
       pomodoroConfig.focusMinutes * 60 * 1000

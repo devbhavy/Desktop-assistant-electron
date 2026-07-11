@@ -17,27 +17,6 @@ export function CatSprite({
     }
 
 
-    // const [skin,setSkin] = useState<CatSkin>();
-    // useEffect(() => {
-    //   const loadSettings = async () => {
-    //     const settings =
-    //       await window.electronAPI.getSettings()
-    
-    //     setSkin(settings.skin)
-    //   }
-    
-    //   loadSettings()
-    
-    //   const cleanup =
-    //     window.electronAPI.onCatSkinChanged(
-    //       (newSkin) => {
-    //         setSkin(newSkin)
-    //       }
-    //     )
-    
-    //   return cleanup
-    // }, [])
-
     return (
       <div
         style={{

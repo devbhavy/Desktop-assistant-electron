@@ -195,6 +195,25 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   resetDefault : ()=>{
     ipcRenderer.send("reset-to-default")
-  }
+  },
+  onPomodoroPhaseChanged: (
+    callback:any
+  ) => {
+    const listener = (_event:any, phase:any) => {
+      callback(phase)
+    }
+  
+    ipcRenderer.on(
+      "pomodoro-phase-changed",
+      listener
+    )
+  
+    return () => {
+      ipcRenderer.removeListener(
+        "pomodoro-phase-changed",
+        listener
+      )
+    }
+  },
 });
 

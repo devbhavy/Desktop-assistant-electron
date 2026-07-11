@@ -87,6 +87,13 @@ declare global {
       closeSettingsWindow: () => void
       closeMessageWindow: () => void
       resetDefault: () => void
+      onPomodoroPhaseChanged: (
+        callback: (
+          phase:
+            | "focus"
+            | "break"
+        ) => void
+      ) => () => void
     };
   }
 }

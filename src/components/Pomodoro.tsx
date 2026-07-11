@@ -55,7 +55,7 @@ export function Pomodoro() {
           const state =
             await window.electronAPI.getPomodoroState()
       
-          // Critical: effect may already have been cleaned up
+          
           if (!isActive) return
       
           if (!state.endTime) return

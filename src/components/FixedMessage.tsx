@@ -43,7 +43,7 @@ export function FixedMessage() {
   
 
   return (
-    <div className="h-screen w-screen p-2 bg-amber-200">
+    <div className="h-screen w-screen p-2">
       <div className="flex h-full flex-col border-[3px] border-black bg-white">
 
         <div className="flex items-center justify-between border-b-[3px] border-black bg-amber-300 px-2 py-1">
