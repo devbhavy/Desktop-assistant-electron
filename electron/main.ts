@@ -5,9 +5,12 @@ import path from 'node:path'
 import {uIOhook} from 'uiohook-napi'
 import { WebContents } from 'electron'
 
+
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import fs from "node:fs"
 
+let DATA_PATH = ""
 
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -52,6 +55,100 @@ ipcMain.handle('read-clipboard-text', () => {
 })
 
 
+type AppData = {
+  fixedMessage: string
+
+  settings: {
+    alwaysOnTop: boolean
+    skin: CatSkin
+  }
+
+  reminders: ReminderData[]
+
+  breakStretch: {
+    active: boolean
+    minutes: number
+  } | null
+}
+
+const defaultData: AppData = {
+  fixedMessage: "",
+
+  settings: {
+    alwaysOnTop: true,
+    skin: "orange",
+  },
+
+  reminders: [],
+
+  breakStretch: null,
+}
+
+function saveData() {
+  const data: AppData = {
+    fixedMessage,
+
+    settings: {
+      alwaysOnTop,
+      skin: currentSkin,
+    },
+
+    reminders,
+
+    breakStretch:
+      breakStretchMinutes !== null
+        ? {
+            active: true,
+            minutes: breakStretchMinutes,
+          }
+        : null,
+  }
+
+  fs.writeFileSync(
+    DATA_PATH,
+    JSON.stringify(data, null, 2),
+    "utf8"
+  )
+}
+
+
+function loadData() {
+  if (!fs.existsSync(DATA_PATH)) {
+    fs.writeFileSync(
+        DATA_PATH,
+        JSON.stringify(defaultData, null, 2),
+        "utf8"
+    )
+
+    return
+}
+
+  const raw = fs.readFileSync(
+    DATA_PATH,
+    "utf8"
+  )
+
+  const data: AppData =
+    JSON.parse(raw)
+
+  fixedMessage = data.fixedMessage
+
+  currentSkin =
+    data.settings.skin
+
+  alwaysOnTop =
+    data.settings.alwaysOnTop
+
+  reminders.push(...data.reminders)
+  for (const reminder of reminders) {
+    scheduleReminder(reminder)
+  }
+
+
+  if (data.breakStretch) {
+    startBreakStretch(data.breakStretch.minutes)
+  }
+}
 
 let dragTimer: NodeJS.Timeout | null = null;
 let dragOffsetX = 0;
@@ -86,7 +183,7 @@ const SETTINGS_OFFSET_X = -380
 
 type CatSkin = "orange" | "black" | "white"
 
-let currentSkin: CatSkin = "orange"
+let currentSkin: CatSkin = "black"
 let alwaysOnTop = true
 
 ipcMain.on("start-drag", (event) => {
@@ -419,6 +516,7 @@ ipcMain.handle(
     }
 
     reminders.push(savedReminder)
+    saveData()
 
     scheduleReminder(savedReminder)
 
@@ -460,6 +558,7 @@ ipcMain.on("show-cat-menu", (event) => {
               !messageWin.isDestroyed()
             ) {
               messageWin.close();
+              saveData();
             }
           },
         },
@@ -517,6 +616,7 @@ ipcMain.on("show-cat-menu", (event) => {
         
                     breakStretchInterval = null
                     breakStretchMinutes = null
+                    saveData()
                   },
                 },
               ]
@@ -592,6 +692,7 @@ ipcMain.on(
   "set-always-on-top",
   (_event, value: boolean) => {
     alwaysOnTop = value
+    saveData();
 
     if (win && !win.isDestroyed()) {
       win.setAlwaysOnTop(value)
@@ -603,6 +704,7 @@ ipcMain.on(
   "set-cat-skin",
   (_event, skin: CatSkin) => {
     currentSkin = skin
+    saveData()
 
     win?.webContents.send(
       "cat-skin-changed",
@@ -613,8 +715,9 @@ ipcMain.on(
 
 
 ipcMain.handle("set-fixed-message", (_, message: string) => {
-  fixedMessage = message;
 
+  fixedMessage = message;
+  saveData()
   console.log("Stored fixed message:", fixedMessage);
 
   return true;
@@ -672,25 +775,31 @@ ipcMain.on("close-settings-window", () => {
   }
 })
 
+function startBreakStretch(minutes: number) {
+  if (breakStretchInterval) {
+    clearInterval(breakStretchInterval)
+  }
+
+  breakStretchMinutes = minutes
+
+  saveData()
+
+  breakStretchInterval = setInterval(() => {
+    showReminderAlert({
+      id: crypto.randomUUID(),
+      message: "Time to stretch!",
+      time: "",
+      repeat: "break-stretch",
+      date: "",
+      days: [],
+    })
+  }, minutes * 60 * 1000)
+}
+
 ipcMain.on(
   "start-break-stretch",
   (_event, minutes: number) => {
-    if (breakStretchInterval) {
-      clearInterval(breakStretchInterval)
-    }
-
-    breakStretchMinutes = minutes
-
-    breakStretchInterval = setInterval(() => {
-      showReminderAlert({
-        id: crypto.randomUUID(),
-        message: "Time to stretch!",
-        time: "",
-        repeat: "break-stretch",
-        date: "",
-        days: [],
-      })
-    }, minutes * 60 * 1000)
+    startBreakStretch(minutes)
 
     breakStretchSetupWin?.close()
   }
@@ -1176,8 +1285,19 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(()=>{
-  createWindow();
+  DATA_PATH = path.join(
+    app.getPath("userData"),
+    "data.json"
+  )
 
+
+  loadData();
+  createWindow();
+  win?.webContents.once("did-finish-load", () => {
+    if (fixedMessage.trim() !== "") {
+      createMessageWindow()
+    }
+  })
 
   let isTyping = false;
   let typingTimeout : NodeJS.Timeout;
