@@ -190,5 +190,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   closeSettingsWindow: () => {
     ipcRenderer.send("close-settings-window")
   },
+  closeMessageWindow: () => {
+    ipcRenderer.send("close-message-window")
+  },
+  resetDefault : ()=>{
+    ipcRenderer.send("reset-to-default")
+  }
 });
 

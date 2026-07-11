@@ -111,6 +111,18 @@ export function Settings() {
             ))}
           </div>
         </div>
+        <div>
+          <button
+            onClick={()=>{
+              window.electronAPI.resetDefault()
+              window.electronAPI.closeSettingsWindow()
+            }}
+            className="flex p-1 items-center justify-center border-2 border-black bg-black font-mono font-bold text-white hover:bg-red-500 cursor-pointer"
+          >
+            Reset Comnyang
+          </button>
+          
+        </div>
 
       </div>
     </div>

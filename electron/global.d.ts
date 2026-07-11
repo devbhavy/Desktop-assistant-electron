@@ -85,6 +85,8 @@ declare global {
         ) => void
       ) => () => void
       closeSettingsWindow: () => void
+      closeMessageWindow: () => void
+      resetDefault: () => void
     };
   }
 }

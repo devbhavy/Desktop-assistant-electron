@@ -1,57 +1,84 @@
 import { useEffect, useState } from "react";
 
 export function FixedMessage() {
-    
-    const [input,setInput] = useState("");
-    const [msg,setMessage] = useState<string>();
-  
-    async function handleSubmit(
-        e: React.FormEvent<HTMLFormElement>
-      ) {
-        e.preventDefault()
-    
-        await window.electronAPI.setFixedMessage(input);
-        setMessage(input)
-        setInput("");
-    }
+  const [input, setInput] = useState("");
+  const [msg, setMessage] = useState("");
 
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
 
-    useEffect(()=>{
-        (async()=>{
-            const response = await window.electronAPI.getFixedMessage();
-            setMessage(response);
-        })()
+    await window.electronAPI.setFixedMessage(input);
+    setMessage(input);
+    setInput("");
+  }
 
-    },[])
+  const handleClose = () => {
+    window.electronAPI.closeMessageWindow();
+  };
 
+  useEffect(() => {
+    (async () => {
+      const response =
+        await window.electronAPI.getFixedMessage();
 
-    if(msg){
-        return(
-            <div className="bg-amber-200">
-                {msg}
-            </div>
-        )
-    }
+      setMessage(response);
+    })();
+  }, []);
 
+  if (msg) {
     return (
-    <div className="flex justify-center p-2 bg-amber-200">
-      <div className="border-[3px] border-black bg-white p-1">
-        <form className="flex gap-x-3" onSubmit={handleSubmit}>
+    <div className="h-screen w-screen flex justify-center items-end">
+      
+      <div className="inline-block border-[3px] border-black bg-white px-4 py-2">
+        <p className="font-mono text-sm font-bold whitespace-pre-wrap">
+          {msg}
+        </p>
+      </div>
+
+    </div>
+    )
+  }
+  
+
+  return (
+    <div className="h-screen w-screen p-2 bg-amber-200">
+      <div className="flex h-full flex-col border-[3px] border-black bg-white">
+
+        <div className="flex items-center justify-between border-b-[3px] border-black bg-amber-300 px-2 py-1">
+          <span className="font-mono font-bold">
+            Fixed Message
+          </span>
+
+          <button
+            onClick={handleClose}
+            className="flex h-6 w-6 items-center justify-center border-2 border-black bg-red-500 text-white font-bold"
+          >
+            ×
+          </button>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-1 flex-col justify-center gap-3 p-4"
+        >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="min-w-0 flex-1 px-[4px] rounded-xl border-2 border-amber-600 font-bold text-sm"
+            placeholder="Type a message..."
+            className="border-2 border-black px-3 py-2 font-mono outline-none"
           />
 
-          <button type="submit">
-            submit
-          </button>
-
-          <button type="button" onClick={()=>setInput("")}>
-            X
+          <button
+            type="submit"
+            className="border-2 border-black bg-green-400 py-2 font-mono font-bold hover:bg-green-300"
+          >
+            Save
           </button>
         </form>
+
       </div>
     </div>
   );

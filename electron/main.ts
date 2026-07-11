@@ -32,12 +32,11 @@ const POMODORO_SETUP_HEIGHT = 220
 const POMODORO_SETUP_OFFSET_Y = -280
 const POMODORO_SETUP_OFFSET_X = -280
 
+const MESSAGE_WIDTH = 320
+const MESSAGE_HEIGHT = 180
 
-const MESSAGE_OFFSET_X = -45;
-const MESSAGE_OFFSET_Y = -100;
-
-const MESSAGE_WIDTH = 350;
-const MESSAGE_HEIGHT = 100;
+const MESSAGE_OFFSET_X = -30
+const MESSAGE_OFFSET_Y = -180
 
 
 const REMINDER_OFFSET_X = -45;
@@ -338,6 +337,11 @@ ipcMain.on(
   }
 )
 let fixedMessage = "";
+ipcMain.on("close-message-window", () => {
+  if (messageWin && !messageWin.isDestroyed()) {
+    messageWin.close()
+  }
+})
 
 type ReminderData = {
   id: string
@@ -533,6 +537,37 @@ ipcMain.on("close-reminder-window", () => {
   ) {
     reminderWin.close()
   }
+})
+
+ipcMain.on("reset-to-default", () => {
+  fixedMessage = defaultData.fixedMessage
+
+  currentSkin = defaultData.settings.skin
+  alwaysOnTop = defaultData.settings.alwaysOnTop
+
+  reminders.splice(0, reminders.length)
+
+  for (const timer of reminderTimers.values()) {
+    clearTimeout(timer)
+  }
+  reminderTimers.clear()
+
+  if (breakStretchInterval) {
+    clearInterval(breakStretchInterval)
+    breakStretchInterval = null
+  }
+
+  breakStretchMinutes = null
+
+  win?.setAlwaysOnTop(alwaysOnTop)
+  win?.webContents.send(
+    "cat-skin-changed",
+    currentSkin
+  )
+
+  messageWin?.close()
+
+  saveData()
 })
 
 
@@ -836,13 +871,13 @@ function createWindow() {
     hitboxTimer = setInterval(() => {
       if (targetWindow.isDestroyed()) return;
 
-      // While dragging, don't mess with mouse handling
+  
       if (dragTimer) return;
 
       const cursor = screen.getCursorScreenPoint();
       const bounds = targetWindow.getBounds();
 
-      // Cursor position relative to BrowserWindow
+     
       const localX = cursor.x - bounds.x;
       const localY = cursor.y - bounds.y;
 
@@ -1265,9 +1300,7 @@ function createSettingsWindow() {
     settingsWin = null
   })
 }
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
   ipcMain.removeHandler('read-clipboard-text')
   if (process.platform !== 'darwin') {
@@ -1277,8 +1310,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
