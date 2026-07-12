@@ -14,16 +14,26 @@ export function PomodoroSetup() {
     )
   }
 
-  
+  const handleClose = () => {
+    window.electronAPI.closePomodoroSetupWindow()
+  }
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-white p-4">
       <div className="flex w-full flex-col gap-4">
 
         <div>
-          <label className="font-mono font-bold">
+          <div className="font-mono font-bold flex justify-between">
+            <div>
             Focus minutes
-          </label>
+            </div>
+            <div>
+              <button onClick={handleClose} className="text-lg hover:cursor-pointer">
+                ×
+              </button>
+            </div>
+            
+          </div>
 
           <input
             type="number"

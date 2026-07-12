@@ -94,6 +94,8 @@ declare global {
             | "break"
         ) => void
       ) => () => void
+      closePomodoroSetupWindow: () => void
+      closeStretchBreakSetupWindow: () => void
     };
   }
 }

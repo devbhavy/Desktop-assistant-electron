@@ -29,8 +29,8 @@ let pomodoroSetupWin: BrowserWindow | null = null
 
 const POMODORO_SETUP_WIDTH = 300
 const POMODORO_SETUP_HEIGHT = 220
-const POMODORO_SETUP_OFFSET_Y = -280
-const POMODORO_SETUP_OFFSET_X = -280
+const POMODORO_SETUP_OFFSET_Y = -220
+const POMODORO_SETUP_OFFSET_X = -70
 
 const MESSAGE_WIDTH = 320
 const MESSAGE_HEIGHT = 180
@@ -169,8 +169,8 @@ let breakStretchSetupWin: BrowserWindow | null = null
 
 const BREAK_STRETCH_WIDTH = 300
 const BREAK_STRETCH_HEIGHT = 170
-const BREAK_STRETCH_OFFSET_Y = -80
-const BREAK_STRETCH_OFFSET_X = -380
+const BREAK_STRETCH_OFFSET_Y = -180
+const BREAK_STRETCH_OFFSET_X = -70
 
 
 let settingsWin: BrowserWindow | null = null
@@ -344,6 +344,25 @@ let fixedMessage = "";
 ipcMain.on("close-message-window", () => {
   if (messageWin && !messageWin.isDestroyed()) {
     messageWin.close()
+  }
+})
+
+
+ipcMain.on("close-pomodoro-setup-window", () => {
+  if (
+    pomodoroSetupWin &&
+    !pomodoroSetupWin.isDestroyed()
+  ) {
+    pomodoroSetupWin.close()
+  }
+})
+
+ipcMain.on("close-stretch-setup-window", () => {
+  if (
+    breakStretchSetupWin &&
+    !breakStretchSetupWin.isDestroyed()
+  ) {
+    breakStretchSetupWin.close()
   }
 })
 

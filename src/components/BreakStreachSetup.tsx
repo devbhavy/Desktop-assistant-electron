@@ -10,14 +10,25 @@ export function BreakStretchSetup() {
       minutes
     )
   }
+  const handleClose = () => {
+    window.electronAPI.closeStretchBreakSetupWindow()
+  }
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-white p-4">
       <div className="flex w-full flex-col gap-4">
         <div>
-          <label className="font-mono font-bold">
-            Remind me every
-          </label>
+          <div className="font-mono font-bold flex justify-between">
+            <div>
+            Remind Me Every
+            </div>
+            <div>
+              <button onClick={handleClose} className="text-lg hover:cursor-pointer">
+                ×
+              </button>
+            </div>
+            
+          </div>
 
           <input
             type="number"

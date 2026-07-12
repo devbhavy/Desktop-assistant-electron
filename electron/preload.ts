@@ -215,5 +215,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
       )
     }
   },
+  closePomodoroSetupWindow: () => {
+    ipcRenderer.send(
+      "close-pomodoro-setup-window"
+    )
+  },
+  closeStretchBreakSetupWindow: () => {
+    ipcRenderer.send(
+      "close-stretch-setup-window"
+    )
+  },
 });
 
