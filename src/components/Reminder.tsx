@@ -79,7 +79,7 @@ export function Reminder() {
               onClick={() =>
                 window.electronAPI.closeReminderWindow()
               }
-              className="bg-black px-3 py-2 font-mono font-bold text-white"
+              className="bg-black px-3 py-2 font-mono font-bold text-white hover:bg-neutral-800"
             >
               Close
             </button>
@@ -166,7 +166,7 @@ export function Reminder() {
 
           <button
               onClick={handleSave}
-              className="bg-black px-3 py-2 font-mono font-bold text-white"
+              className="bg-black px-3 py-2 font-mono font-bold text-white hover:bg-neutral-800"
             >
               Save
             </button>

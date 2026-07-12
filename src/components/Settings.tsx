@@ -53,7 +53,7 @@ export function Settings() {
 
           <button
             onClick={handleClose}
-            className="border-[3px] border-black bg-black px-3 py-2 font-bold text-white"
+            className="border-[3px] border-black bg-black px-3 py-2 font-bold text-white hover:bg-neutral-800"
           >
             Close
           </button>

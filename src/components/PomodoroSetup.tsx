@@ -89,7 +89,7 @@ export function PomodoroSetup() {
      
         <button
           onClick={handleStart}
-          className="border-[3px] border-black bg-black py-2 text-base font-bold text-white hover:bg-red-500"
+          className="border-[3px] border-black bg-black py-2 text-base font-bold text-white hover:bg-neutral-800"
         >
           Start
         </button>

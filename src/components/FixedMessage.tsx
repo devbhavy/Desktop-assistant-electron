@@ -73,7 +73,7 @@ export function FixedMessage() {
 
           <button
             type="submit"
-            className="border-2 border-black bg-green-400 py-2 font-mono font-bold hover:bg-green-300"
+            className="border-2 border-black bg-black py-2 text-white font-mono font-bold hover:bg-neutral-800"
           >
             Save
           </button>
