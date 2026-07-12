@@ -6,47 +6,56 @@ export function BreakStretchSetup() {
   const handleStart = () => {
     if (minutes < 1) return
 
-    window.electronAPI.startBreakStretch(
-      minutes
-    )
+    window.electronAPI.startBreakStretch(minutes)
   }
+
   const handleClose = () => {
     window.electronAPI.closeStretchBreakSetupWindow()
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-white p-4">
-      <div className="flex w-full flex-col gap-4">
-        <div>
-          <div className="font-mono font-bold flex justify-between">
-            <div>
-            Remind Me Every
-            </div>
-            <div>
-              <button onClick={handleClose} className="text-lg hover:cursor-pointer">
-                ×
-              </button>
-            </div>
-            
-          </div>
+    <div className="h-screen w-screen">
+      <div className="flex h-full flex-col border-[3px] border-black p-3 font-mono rounded-lg">
 
-          <input
-            type="number"
-            min={1}
-            value={minutes}
-            onChange={(e) =>
-              setMinutes(Number(e.target.value))
-            }
-            className="w-full border-2 border-black p-2"
-          />
+        <div className="mb-1 flex items-center justify-between">
+          <h1 className="text-base font-bold">
+            Stretch Break
+          </h1>
+
+          <button
+            onClick={handleClose}
+            className="border-[3px] border-black bg-black px-2 py-0.5 text-sm font-bold text-white hover:bg-neutral-800"
+          >
+            Close
+          </button>
         </div>
+
+   
+        <label className="mb-0.5 text-sm font-bold">
+          Remind me every
+        </label>
+
+        <div className="mb-2 flex items-center gap-2">
+            <input
+              type="number"
+              min={1}
+              value={minutes}
+              onChange={(e) => setMinutes(Number(e.target.value))}
+              className="w-full border-[3px] border-black px-2 py-0.5 text-sm font-bold outline-none"
+            />
+
+            <span className="text-sm font-bold">
+              min(s)
+            </span>
+          </div>
 
         <button
           onClick={handleStart}
-          className="border-2 border-black bg-red-500 p-2 font-mono font-bold text-white"
+          className="w-full border-[3px] border-black bg-black py-1 text-sm font-bold text-white hover:bg-neutral-800"
         >
           Start
         </button>
+
       </div>
     </div>
   )

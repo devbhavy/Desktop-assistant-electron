@@ -47,7 +47,7 @@ const ALERT_WIDTH = 320
 const ALERT_HEIGHT = 110
 
 const ALERT_OFFSET_X = -80
-const ALERT_OFFSET_Y = -120
+const ALERT_OFFSET_Y = -80
 
 ipcMain.handle('read-clipboard-text', () => {
   return clipboard.readText()
@@ -1207,6 +1207,7 @@ function createPomodoroSetupWindow() {
     frame: false,
     resizable: false,
     alwaysOnTop: true,
+    skipTaskbar: true,
 
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
@@ -1253,6 +1254,7 @@ function createBreakStretchSetupWindow() {
     frame: false,
     resizable: false,
     alwaysOnTop: true,
+    skipTaskbar: true,
 
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
@@ -1305,6 +1307,7 @@ function createSettingsWindow() {
     frame: false,
     resizable: false,
     alwaysOnTop: true,
+    skipTaskbar: true,
 
     webPreferences: {
       preload: path.join(

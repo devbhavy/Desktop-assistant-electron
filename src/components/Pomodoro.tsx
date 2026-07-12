@@ -6,10 +6,6 @@ export function Pomodoro() {
     const [secondsLeft, setSecondsLeft] = useState(0)
     const [phase, setPhase] =
     useState<PomodoroPhase>("focus")
-    const handleClose = () => {
-      window.electronAPI.closePomodoroSetupWindow()
-    }
-
     useEffect(() => {
         let intervalId: ReturnType<typeof setInterval> | null = null
         let currentEndTime: number | null = null

@@ -38,11 +38,11 @@ export function ReminderAlert() {
   if (!reminder) return null
 
   return (
-    <div className="h-screen w-screen p-2">
-      <div className="flex h-full w-full flex-col justify-between border-[3px] border-black bg-red-500 text-white p-3">
-        <p className="font-mono font-bold">
-          {reminder.message}
-        </p>
+    <div className="h-screen w-screen p-2 flex justify-center items-center">
+      <div className="border-[3px] border-black bg-red-500 text-white p-3 font-mono font-bold">
+        
+        {reminder.message}
+        
       </div>
     </div>
   )
