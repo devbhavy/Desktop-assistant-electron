@@ -19,7 +19,7 @@ export function ReminderAlert() {
   useEffect(() => {
       const audio = meowSound.current;
       audio.loop = false;
-      audio.volume = 0.25;
+      audio.volume = 0.8;
       audio.currentTime = 0;
 
       audio.play().catch(() => {});

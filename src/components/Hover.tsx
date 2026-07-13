@@ -13,7 +13,7 @@ export function Hover({skin,pomodoroPhase} : {skin :CatSkin,pomodoroPhase:Pomodo
     useEffect(() => {
         const audio = purrRef.current;
         audio.loop = true;
-        audio.volume = 0.25;
+        audio.volume = 0.8;
         audio.currentTime = 0;
 
         audio.play().catch(() => {});
