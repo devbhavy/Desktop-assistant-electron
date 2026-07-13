@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import meowSoundCat from "../assets/audio/meow-alert.m4a"
 
 type ReminderData = {
   id: string
@@ -10,9 +11,24 @@ type ReminderData = {
 }
 
 export function ReminderAlert() {
+  const meowSound = useRef(new Audio(meowSoundCat));
+
   const [reminder, setReminder] =
     useState<ReminderData | null>(null)
+  
+  useEffect(() => {
+      const audio = meowSound.current;
+      audio.loop = false;
+      audio.volume = 0.25;
+      audio.currentTime = 0;
 
+      audio.play().catch(() => {});
+
+      return () => {
+          audio.pause();
+          audio.currentTime = 0;
+      };
+  }, []);
     useEffect(() => {
       let timeoutId: ReturnType<typeof setTimeout> | null = null
     

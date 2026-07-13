@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {uIOhook} from 'uiohook-napi'
-import { WebContents } from 'electron'
+
 
 
 const require = createRequire(import.meta.url)
@@ -899,7 +899,6 @@ function createWindow() {
 
   startHitboxTracking(win);
   let hitboxTimer: NodeJS.Timeout | null = null;
-
   function startHitboxTracking(targetWindow: BrowserWindow) {
     hitboxTimer = setInterval(() => {
       if (targetWindow.isDestroyed()) return;

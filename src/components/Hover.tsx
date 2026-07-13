@@ -1,11 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PomodoroPhase } from "../App";
 import { CatSprite } from "./CatSprite";
 import { PixelHeart } from "./heart/Heart";
 import { CatSkin } from "./Settings";
+import purrSound from "../assets/audio/workspace_assets_sound_purring.m4a"
 
 export function Hover({skin,pomodoroPhase} : {skin :CatSkin,pomodoroPhase:PomodoroPhase}){
     const [col,setCol] = useState(0);
+
+    const purrRef = useRef(new Audio(purrSound));
+
+    useEffect(() => {
+        const audio = purrRef.current;
+        audio.loop = true;
+        audio.volume = 0.25;
+        audio.currentTime = 0;
+
+        audio.play().catch(() => {});
+
+        return () => {
+            audio.pause();
+            audio.currentTime = 0;
+        };
+    }, []);
+
     useEffect(()=>{
         const int =setInterval(()=>{
             setCol((prev)=>(prev+1)%2);

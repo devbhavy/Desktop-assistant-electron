@@ -1,8 +1,27 @@
 {
-  "name": "electron-vite-project",
+  "name": "kompanion",
+  "productName": "Kompanion",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "A desktop companion with reminders, Pomodoro timer, break reminders, and an adorable cat.",
+  "author": "Bhavya Joshi",
   "type": "module",
+  "main": "dist-electron/main.js",
+  "build": {
+    "appId": "com.bhavya.kompanion",
+    "productName": "Kompanion",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
@@ -31,6 +50,5 @@
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"
-  },
-  "main": "dist-electron/main.js"
+  }
 }

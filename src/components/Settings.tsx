@@ -101,8 +101,6 @@ export function Settings() {
         </div>
 
         <div className="flex-1" />
-
-        {/* Reset */}
         <button
           onClick={() => {
             window.electronAPI.resetDefault()
@@ -110,7 +108,7 @@ export function Settings() {
           }}
           className="border-[3px] border-black bg-black py-2 font-bold text-white hover:bg-red-600"
         >
-          Reset Comnyang
+          Reset Konpanion
         </button>
 
       </div>
