@@ -54,7 +54,7 @@ export function Idle({skin} : {skin :CatSkin}){
     function changeSubStateRandom(){
       const index : number = Math.floor(4*Math.random());
       setSubstate(()=>{
-        const filteredKeys = Object.keys(temp).filter((value,index)=>{
+        const filteredKeys = Object.keys(temp).filter((_,index)=>{
           if(index==0){
             return false
           }

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { CatSpriteProps } from "../App";
 import { CatSkin } from "./Settings";
 

@@ -1,12 +1,12 @@
 import { app, BrowserWindow, clipboard, ipcMain,screen,Menu } from 'electron'
-import { createRequire } from 'node:module'
+// import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {uIOhook} from 'uiohook-napi'
 
 
 
-const require = createRequire(import.meta.url)
+//const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 import fs from "node:fs"
 
@@ -898,9 +898,9 @@ function createWindow() {
   });
 
   startHitboxTracking(win);
-  let hitboxTimer: NodeJS.Timeout | null = null;
+
   function startHitboxTracking(targetWindow: BrowserWindow) {
-    hitboxTimer = setInterval(() => {
+    let hitboxTimer = setInterval(() => {
       if (targetWindow.isDestroyed()) return;
 
   
@@ -923,6 +923,11 @@ function createWindow() {
         !isInsideHitbox,
         { forward: true }
       );
+
+
+      targetWindow.on("closed",()=>{
+        clearInterval(hitboxTimer)
+      })
     }, 16);
   }
 
