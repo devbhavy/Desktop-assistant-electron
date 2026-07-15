@@ -925,10 +925,11 @@ function createWindow() {
       );
 
 
-      targetWindow.on("closed",()=>{
-        clearInterval(hitboxTimer)
-      })
+      
     }, 16);
+    targetWindow.on("closed",()=>{
+      clearInterval(hitboxTimer)
+    })
   }
 
 
@@ -1022,7 +1023,7 @@ function createReminderWindow() {
     return
   }
 
-
+  
   const catBounds = win.getBounds();
 
 
@@ -1050,7 +1051,7 @@ function createReminderWindow() {
   } else {
     reminderWin.loadFile(
       path.join(RENDERER_DIST, "index.html"),
-      { hash: "reminder" }
+      { hash: "/reminder" }
     )
   }
 
@@ -1168,7 +1169,7 @@ function createPomodoroWindow() {
     pomodoroWin.loadFile(
       path.join(RENDERER_DIST, "index.html"),
       {
-        hash: "pomodoro",
+        hash: "/pomodoro",
       }
     )
   }
@@ -1226,7 +1227,7 @@ function createPomodoroSetupWindow() {
     pomodoroSetupWin.loadFile(
       path.join(RENDERER_DIST, "index.html"),
       {
-        hash: "pomodoro-setup",
+        hash: "/pomodoro-setup",
       }
     )
   }
@@ -1273,7 +1274,7 @@ function createBreakStretchSetupWindow() {
     breakStretchSetupWin.loadFile(
       path.join(RENDERER_DIST, "index.html"),
       {
-        hash: "break-stretch-setup",
+        hash: "/break-stretch-setup",
       }
     )
   }
@@ -1331,7 +1332,7 @@ function createSettingsWindow() {
     settingsWin.loadFile(
       path.join(RENDERER_DIST, "index.html"),
       {
-        hash: "settings",
+        hash: "/settings",
       }
     )
   }

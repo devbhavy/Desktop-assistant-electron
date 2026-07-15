@@ -1,3 +1,14 @@
+import blackSprite from "../assets/cat-spritesheet-1.png";
+import whiteSprite from "../assets/cat-spritesheet-2.png";
+import orangeSprite from "../assets/cat-spritesheet-3.png";
+
+const mapping: Record<CatSkin, string> = {
+  black: blackSprite,
+  white: whiteSprite,
+  orange: orangeSprite,
+};
+
+
 import { CatSpriteProps } from "../App";
 import { CatSkin } from "./Settings";
 
@@ -7,13 +18,6 @@ export function CatSprite({
     scale = 3,
     skin = "black"
   }: CatSpriteProps & { scale?: number } &{skin : CatSkin}) {
-
-
-    const mapping : Record<CatSkin,string> = {
-      "black" : "cat-spritesheet-1",
-      "orange" : "cat-spritesheet-3",
-      "white" : "cat-spritesheet-2"
-    }
 
 
     return (
@@ -27,7 +31,7 @@ export function CatSprite({
           style={{
             width: 64,
             height: 64,
-            backgroundImage: `url("/src/assets/${mapping[skin]}.png")`,
+            backgroundImage: `url(${mapping[skin]})`,
             backgroundPosition: `${-col * 64}px ${-row * 64}px`,
             backgroundRepeat: "no-repeat",
             imageRendering: "pixelated",

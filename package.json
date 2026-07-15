@@ -1,6 +1,6 @@
 {
-  "name": "kompanion",
-  "productName": "Kompanion",
+  "name": "konpanion",
+  "productName": "Konpanion",
   "private": true,
   "version": "1.0.0",
   "description": "A desktop companion with reminders, Pomodoro timer, break reminders, and an adorable cat.",
@@ -8,8 +8,8 @@
   "type": "module",
   "main": "dist-electron/main.js",
   "build": {
-    "appId": "com.bhavya.kompanion",
-    "productName": "Kompanion",
+    "appId": "com.bhavya.konpanion",
+    "productName": "Konpanion",
     "directories": {
       "buildResources": "build"
     },

@@ -24,7 +24,7 @@ export type PomodoroPhase = "focus" | "break" | null
 
 
 function App(){
-  
+  console.log("HASH:", window.location.hash);
   const [pomodoroPhase, setPomodoroPhase] =useState<PomodoroPhase>("focus")
 
   const [currentState,setCurrentState] = useState<currentState>("idle");
